@@ -29,9 +29,14 @@ namespace Ghost.classes
             } catch { this.path = ""; }
         }
 
-        public bool exclude(bool exclude) {
+        public bool exclude(bool exclude, bool visible) {
             this.excluded = exclude;
-            int result = SetWindowDisplayAffinity(hwnd, exclude ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+            int result = SetWindowDisplayAffinity(
+                hwnd, 
+                (exclude) ? 
+                    ((visible) ? WDA_MONITOR : WDA_EXCLUDEFROMCAPTURE) 
+                    : WDA_NONE
+                );
 
             if (result != 0) {
                 Console.WriteLine("Failed to exclude window: " + name + " (" + result + ")");
@@ -73,11 +78,12 @@ namespace Ghost.classes
         public const int GWL_STYLE = -16;
         public const int WS_VISIBLE = 0x10000000;
 
-        private const int WDA_EXCLUDEFROMCAPTURE = 0x00000011;
-        private const int WDA_NONE = 0x00000000;
+        private const uint WDA_EXCLUDEFROMCAPTURE = 0x00000011;
+        private const uint WDA_MONITOR = 0x00000001;
+        private const uint WDA_NONE = 0x00000000;
 
         [DllImport("user32.dll")]
-        private static extern int SetWindowDisplayAffinity(IntPtr hWnd, int nIndex);
+        private static extern int SetWindowDisplayAffinity(IntPtr hWnd, uint nIndex);
         [DllImport("user32.dll")]
         private static extern int GetWindowDisplayAffinity(IntPtr hWnd, out int affinity);
 
