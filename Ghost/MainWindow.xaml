@@ -28,7 +28,7 @@
             </Grid.RowDefinitions>
 
             <!-- Search bar -->
-            <StackPanel Orientation="Vertical" Grid.Row="0"/>
+            <StackPanel Orientation="Vertical" Grid.Row="0"  ToolTip="Search applications to hide from screen capture"/>
 
             <!-- DataGrid to display search results -->
             <DataGrid
@@ -40,9 +40,12 @@
                 Grid.Row="1"
                 Height="Auto"
                 Width="400" Grid.RowSpan="2"
-                PreviewMouseDoubleClick="targetExcludeModified"
+                SelectionChanged="disableSelection"
             >
                 <DataGrid.Columns>
+                    <!-- Process ID column -->
+                    <DataGridTextColumn Width="1*" Header="Pid" CanUserResize="True" Binding="{Binding pid}"/>
+
                     <!-- Name column -->
                     <DataGridTextColumn Width="1*" Header="Name" CanUserResize="True" Binding="{Binding name}"/>
 
@@ -55,9 +58,19 @@
                     </DataGridTemplateColumn> -->
 
                     <!-- Hidden Select column -->
-                    <DataGridCheckBoxColumn Width="100" CanUserResize="False" Binding="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" Header="Is Hidden"/>
+                    <!-- <DataGridCheckBoxColumn Width="100" CanUserResize="False" Checked="targetExcludeModified" Binding="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" Header="Is Hidden"/> -->
+                    <DataGridTemplateColumn Width="100" CanUserResize="False" Header="Is Hidden">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" 
+                                  IsEnabled="{Binding Path=DataContext.IsEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                  Click="targetExcludeModified"
+                                          />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <!-- Path column -->
-                    <DataGridTextColumn Width="1*" CanUserResize="False" Header="Path" Binding="{Binding path}"/>
+                    <DataGridTextColumn Width="1*" CanUserResize="False" Header="Path"  Binding="{Binding path}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <hc:WatermarkTextBox 

@@ -71,9 +71,11 @@ namespace Ghost
             check_loading();
             new Thread(() => {
                 Console.WriteLine("Getting processes list...");
-                var startTime = DateTime.Now;
+                var startTime = DateTime.Now.Millisecond;
 
                 processes = ProcessHandler.get_processes();
+                Console.WriteLine($"Processes list completed in {DateTime.Now.Millisecond - startTime}ms");
+
                 foreach (var proc in processes) {
                     if (proc.path.IsNullOrEmpty())
                         continue;
@@ -83,11 +85,11 @@ namespace Ghost
                     });
                 }
 
+                Console.WriteLine($"Processes list added into ui in {DateTime.Now.Millisecond - startTime}ms");
+
                 Application.Current.Dispatcher.Invoke(() => {
                     check_loading();
                 });
-
-                Console.WriteLine("Processes list updated. " + (DateTime.Now - startTime) + "ms");
             }).Start();
         }
 
@@ -98,21 +100,31 @@ namespace Ghost
             SearchContainer.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
         }
 
-        private void targetExcludeModified(object sender, RoutedEventArgs e)
-        {
+
+        private void targetExcludeModified(object sender, RoutedEventArgs e) {
+            Console.WriteLine($"called void targetExcludeModified({sender.ToString()}, {e.ToString()})");
             var item = (ProcessHandler)ProcessDataGrid.SelectedItem;
-            Console.WriteLine("Target exclude modified: " + item.ToString());
+            Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "value is null")}");
+
             if (item == null)
                 return;
 
             var process = processes.Find(x => x.name == item.name);
+
             if (process == null)
                 return;
 
-            process.exclude(!process.excluded);
-            Console.Beep();
+            Console.WriteLine($"Found process {process.name}({process.pid}) [{(process.excluded ? "hidden" : "visible")}] => [{(!process.excluded ? "hidden" : "visible")}]");
+
+            process.excluded = !process.excluded;
+
+            if (process.overlay != null)
+                process.overlay.destroy();
+
+            process.overlay = process.excluded ? new Overlay(process.hwnd) : null;
 
             ProcessDataGrid.Items.Refresh();
+            ProcessDataGrid.SelectedIndex = -1;
         }
 
         private void filterProcesses(object sender, System.Windows.Controls.TextChangedEventArgs e) {
@@ -134,6 +146,13 @@ namespace Ghost
             }
 
             check_loading();
+        }
+
+        private void handled_event(object sender, MouseButtonEventArgs e) { }
+
+        private void disableSelection(object sender, SelectionChangedEventArgs e) {
+            Console.WriteLine($"Selection changed by {sender.ToString()}");
+            ProcessDataGrid.SelectedIndex = -1;
         }
     }
 }
