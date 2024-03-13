@@ -25,7 +25,8 @@ namespace Ghost
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        public static List<ProcessHandler> processes;
+        private static List<ProcessHandler> processes;
+        private static ProcessHandler? cache_handler;
         public MainWindow()
         {
             var chrome = new WindowChrome
@@ -69,28 +70,34 @@ namespace Ghost
             }
 
             check_loading();
-            new Thread(() => {
-                Console.WriteLine("Getting processes list...");
-                var startTime = DateTime.Now.Millisecond;
+            Task.Run(update_processes);
+        }
 
-                processes = ProcessHandler.get_processes();
-                Console.WriteLine($"Processes list completed in {DateTime.Now.Millisecond - startTime}ms");
+        public async void update_processes() {
+            Application.Current.Dispatcher.Invoke(() => {
+                ProcessDataGrid.Items.Clear();
+            });
 
-                foreach (var proc in processes) {
-                    if (proc.path.IsNullOrEmpty())
-                        continue;
+            Console.WriteLine("Getting processes list...");
+            var startTime = DateTime.Now.Millisecond;
 
-                    Application.Current.Dispatcher.Invoke(() => {
-                        ProcessDataGrid.Items.Add(proc);
-                    });
-                }
+            processes = ProcessHandler.get_processes();
+            Console.WriteLine($"Processes list completed in {DateTime.Now.Millisecond - startTime}ms");
 
-                Console.WriteLine($"Processes list added into ui in {DateTime.Now.Millisecond - startTime}ms");
+            foreach (var proc in processes)
+            {
+                if (proc.path.IsNullOrEmpty())
+                    continue;
 
                 Application.Current.Dispatcher.Invoke(() => {
-                    check_loading();
+                    ProcessDataGrid.Items.Add(proc);
                 });
-            }).Start();
+            }
+
+            Console.WriteLine($"Processes list added into ui in {DateTime.Now.Millisecond - startTime}ms");
+            Application.Current.Dispatcher.Invoke(() => {
+                check_loading();
+            });
         }
 
         public void check_loading() {
@@ -102,9 +109,9 @@ namespace Ghost
 
 
         private void targetExcludeModified(object sender, RoutedEventArgs e) {
-            Console.WriteLine($"called void targetExcludeModified({sender.ToString()}, {e.ToString()})");
-            var item = (ProcessHandler)ProcessDataGrid.SelectedItem;
-            Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "value is null")}");
+            //var item = processes.ElementAt(cache_index); // (ProcessHandler)ProcessDataGrid.SelectedItem;
+            var item = cache_handler;
+            Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "is not existant")}");
 
             if (item == null)
                 return;
@@ -116,7 +123,7 @@ namespace Ghost
 
             Console.WriteLine($"Found process {process.name}({process.pid}) [{(process.excluded ? "hidden" : "visible")}] => [{(!process.excluded ? "hidden" : "visible")}]");
 
-            process.excluded = !process.excluded;
+            //process.excluded = !process.excluded;
 
             if (process.overlay != null)
                 process.overlay.destroy();
@@ -149,10 +156,13 @@ namespace Ghost
         }
 
         private void handled_event(object sender, MouseButtonEventArgs e) { }
-
         private void disableSelection(object sender, SelectionChangedEventArgs e) {
-            Console.WriteLine($"Selection changed by {sender.ToString()}");
+            if (ProcessDataGrid.SelectedIndex == -1)
+                return;
+
+            cache_handler = ProcessDataGrid.SelectedItem as ProcessHandler;
             ProcessDataGrid.SelectedIndex = -1;
+            Console.WriteLine($"Selection changed to {(cache_handler != null ? cache_handler.name : "was not existant")}");
         }
     }
 }

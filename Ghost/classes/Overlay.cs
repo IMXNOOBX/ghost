@@ -87,9 +87,10 @@ namespace Ghost.classes
                 RECT rect;
                 GetWindowRect(hwnd, out rect);
 
-                bool isVisible = IsWindowVisible(hwnd) && !IsWindowCloaked(hwnd);
-
                 Dispatcher.Invoke(() => {
+                    // Check if any corners of the window are visible
+                    bool isVisible = IsWindowVisibleAndOnTop(hwnd);
+
                     try {
                         if (overlayWindow != null)
                             overlayWindow.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
@@ -111,10 +112,25 @@ namespace Ghost.classes
             );
         }
 
-        private bool IsWindowCloaked(IntPtr hwnd) {
-            bool isCloaked = false;
-            int result = DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, out isCloaked, sizeof(bool));
-            return result == 0 && isCloaked;
+        public static bool IsWindowVisibleAndOnTop(IntPtr hWnd)
+        {
+            if (!IsWindowVisible(hWnd))
+                return false;
+
+            RECT rect;
+            GetWindowRect(hWnd, out rect);
+
+            Console.WriteLine($"Checking TopLeft ({rect.Left}/{rect.Top}) {WindowFromPoint(rect.Left, rect.Top)} == {hWnd}");
+            Console.WriteLine($"Checking TopRight ({rect.Right}/{rect.Top}) {WindowFromPoint(rect.Right - 1, rect.Top)} == {hWnd}");
+            Console.WriteLine($"Checking BottomLeft ({rect.Left}/{rect.Bottom}) {WindowFromPoint(rect.Left, rect.Bottom - 1)} == {hWnd}");
+            Console.WriteLine($"Checking BottomRight ({rect.Right}/{rect.Bottom}) {WindowFromPoint(rect.Right - 1, rect.Bottom - 1)} == {hWnd}");
+
+
+            // Check if all corners of the window are visible and are the same window
+            return (WindowFromPoint(rect.Left, rect.Top) == hWnd && // TopLeft Check
+                        WindowFromPoint(rect.Right - 1, rect.Top) == hWnd && // TopRight Check
+                        WindowFromPoint(rect.Left, rect.Bottom - 1) == hWnd && // BottomLeft Check
+                        WindowFromPoint(rect.Right - 1, rect.Bottom - 1) == hWnd); // BottomRight Check
         }
 
         // Windows API methods
@@ -126,14 +142,12 @@ namespace Ghost.classes
 
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hwnd, int index);
-
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
-
         [DllImport("user32.dll")]
         private static extern bool IsWindowVisible(IntPtr hwnd);
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out bool pvAttribute, int cbAttribute);
+        [DllImport("user32.dll")]
+        public static extern IntPtr WindowFromPoint(int x, int y);
 
 
         [DllImport("user32.dll")]
