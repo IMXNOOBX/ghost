@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ghost"
         xmlns:sys="clr-namespace:System;assembly=netstandard"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:hc="https://handyorg.github.io/handycontrol" 
+        xmlns:localclass="clr-namespace:Ghost.classes"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,7 +29,7 @@
             </Grid.RowDefinitions>
 
             <!-- Search bar -->
-            <StackPanel Orientation="Vertical" Grid.Row="0"  ToolTip="Search applications to hide from screen capture"/>
+            <StackPanel Orientation="Vertical" Grid.Row="0" ToolTip="Search applications to hide from screen capture"/>
 
             <!-- DataGrid to display search results -->
             <DataGrid
@@ -39,23 +40,25 @@
                 CanUserAddRows="False"
                 Grid.Row="1"
                 Height="Auto"
+                
                 Width="400" Grid.RowSpan="2"
                 SelectionChanged="disableSelection"
             >
                 <DataGrid.Columns>
+                    <!-- Process Icon column -->
+                    <DataGridTemplateColumn Width="60" CanUserResize="False">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding icon}" Width="32" Height="32" Stretch="Uniform"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <!-- Process ID column -->
                     <DataGridTextColumn Width="1*" Header="Pid" CanUserResize="True" Binding="{Binding pid}"/>
 
                     <!-- Name column -->
                     <DataGridTextColumn Width="1*" Header="Name" CanUserResize="True" Binding="{Binding name}"/>
-
-                    <!-- <DataGridTemplateColumn Width="60" CanUserResize="False">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Image Source="{Binding Icon}" Width="32" Height="32" Stretch="Uniform"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn> -->
 
                     <!-- Hidden Select column -->
                     <!-- <DataGridCheckBoxColumn Width="100" CanUserResize="False" Checked="targetExcludeModified" Binding="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" Header="Is Hidden"/> -->

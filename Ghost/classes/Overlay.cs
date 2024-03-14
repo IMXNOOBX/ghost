@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
+using WVS;
 
 namespace Ghost.classes
 {
@@ -29,13 +30,18 @@ namespace Ghost.classes
             this.hwnd = hwnd;
             CreateOverlay();
             InitBackgroundWorker();
+
+            WVS.WindowVisibilityChecker.init();
         }
 
         public void destroy() {
+            Console.WriteLine($"Destroying overlay for ({hwnd})");
             SetWindowProtected(false);
             bgWorker.CancelAsync();
             bgWorker.Dispose();
-            overlayWindow.Close();
+            Dispatcher.Invoke(() => {
+                overlayWindow.Close();
+            });
         }
 
         private Window CreateOverlay() {
@@ -69,7 +75,7 @@ namespace Ghost.classes
 
             SetWindowProtected(true);
 
-            Console.WriteLine($"Overlay created successfully for ({hwnd})!");
+            Console.WriteLine($"Overlay created successfully for ({hwnd}) with handle ({this.overlayHwnd})!");
 
             return overlayWindow;
         }
@@ -84,22 +90,43 @@ namespace Ghost.classes
 
         private void UpdateOverlay(object sender, DoWorkEventArgs e) {
             while (!bgWorker.CancellationPending) {
+                if (overlayWindow == null)
+                    continue;
+
+                if (hwnd == IntPtr.Zero)
+                    continue;
+
+                // Check if the hwnd is still valid
+                uint pid = 0;
+                if (GetWindowThreadProcessId(hwnd, out pid) == 0) {
+                    this.destroy();
+                    break;
+                }
+
                 RECT rect;
                 GetWindowRect(hwnd, out rect);
 
+
+
                 Dispatcher.Invoke(() => {
-                    // Check if any corners of the window are visible
-                    bool isVisible = IsWindowVisibleAndOnTop(hwnd);
+                    // Check with diferent methods if the target window is visible on screen
+                    // Thanks to: https://github.com/Real-Gollum/Window-Visibility-Detector
+                    bool isVisible = WVS.WindowVisibilityChecker.IsWindowVisibleOnScreen(hwnd);
 
                     try {
-                        if (overlayWindow != null)
-                            overlayWindow.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+                        overlayWindow.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+
+                        overlayWindow.Left = rect.Left;
+                        overlayWindow.Top = rect.Top;
+                        overlayWindow.Width = rect.Right - rect.Left;
+                        overlayWindow.Height = rect.Bottom - rect.Top;
                     }  catch { }
 
-                    SetWindowPos(overlayHwnd, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, 0);
+                    // Causes to lose focus on the main application rendering it unusable
+                    //SetWindowPos(overlayHwnd, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, 0);
                 });
 
-                System.Threading.Thread.Sleep(25);
+                Thread.Sleep(25);
             }
         }
 
@@ -110,27 +137,6 @@ namespace Ghost.classes
                 overlayHwnd,
                 (status) ? WDA_MONITOR : WDA_NONE
             );
-        }
-
-        public static bool IsWindowVisibleAndOnTop(IntPtr hWnd)
-        {
-            if (!IsWindowVisible(hWnd))
-                return false;
-
-            RECT rect;
-            GetWindowRect(hWnd, out rect);
-
-            Console.WriteLine($"Checking TopLeft ({rect.Left}/{rect.Top}) {WindowFromPoint(rect.Left, rect.Top)} == {hWnd}");
-            Console.WriteLine($"Checking TopRight ({rect.Right}/{rect.Top}) {WindowFromPoint(rect.Right - 1, rect.Top)} == {hWnd}");
-            Console.WriteLine($"Checking BottomLeft ({rect.Left}/{rect.Bottom}) {WindowFromPoint(rect.Left, rect.Bottom - 1)} == {hWnd}");
-            Console.WriteLine($"Checking BottomRight ({rect.Right}/{rect.Bottom}) {WindowFromPoint(rect.Right - 1, rect.Bottom - 1)} == {hWnd}");
-
-
-            // Check if all corners of the window are visible and are the same window
-            return (WindowFromPoint(rect.Left, rect.Top) == hWnd && // TopLeft Check
-                        WindowFromPoint(rect.Right - 1, rect.Top) == hWnd && // TopRight Check
-                        WindowFromPoint(rect.Left, rect.Bottom - 1) == hWnd && // BottomLeft Check
-                        WindowFromPoint(rect.Right - 1, rect.Bottom - 1) == hWnd); // BottomRight Check
         }
 
         // Windows API methods
@@ -144,15 +150,12 @@ namespace Ghost.classes
         private static extern int GetWindowLong(IntPtr hwnd, int index);
         [DllImport("user32.dll")]
         private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
-        [DllImport("user32.dll")]
-        private static extern bool IsWindowVisible(IntPtr hwnd);
-        [DllImport("user32.dll")]
-        public static extern IntPtr WindowFromPoint(int x, int y);
-
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
         [DllImport("user32.dll")]
         private static extern int SetWindowDisplayAffinity(IntPtr hWnd, uint nIndex);
@@ -164,12 +167,19 @@ namespace Ghost.classes
         private static extern bool SetWindowPos(IntPtr hwnd, IntPtr hwndInsertAfter, int x, int y, int cx, int cy, uint flags);
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
+        public struct RECT
         {
             public int Left;
             public int Top;
             public int Right;
             public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT
+        {
+            public int x;
+            public int y;
         }
     }
 }
