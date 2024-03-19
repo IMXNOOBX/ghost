@@ -16,6 +16,7 @@ using Ghost.classes;
 using HandyControl.Controls;
 using System.Runtime.InteropServices;
 using HandyControl.Tools.Extension;
+using System.Diagnostics;
 
 
 namespace Ghost
@@ -29,33 +30,35 @@ namespace Ghost
         private static ProcessHandler? cache_selected_handler;
         public MainWindow()
         {
+            bool isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
             {
                 CaptionHeight = 0,
                 UseAeroCaptionButtons = false,
                 CornerRadius = new CornerRadius(15),
-                GlassFrameThickness = new Thickness(0),
-                ResizeBorderThickness = new Thickness(3),
+                //GlassFrameThickness = new Thickness(0),
+                //ResizeBorderThickness = new Thickness(3),
                 NonClientFrameEdges = NonClientFrameEdges.None,
             };
 
-            WindowChrome.SetWindowChrome(this, chrome);
+            //WindowChrome.SetWindowChrome(this, chrome);
 
             InitializeComponent();
 
             // Set window properties
             this.Title = config.fullName;
-            this.WindowStyle = WindowStyle.SingleBorderWindow;
+            this.WindowStyle = WindowStyle.None; // WindowStyle.SingleBorderWindow;
             this.Width = config.windowSize.X;
             this.Height = config.windowSize.Y;
-            //this.Background = Brushes.Black;
+            this.Background = isLight ? Brushes.White : Brushes.Black;
+            this.Opacity = 0.95;
+            this.AllowsTransparency = true;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.Activate();
 
             // Set ToolBar properties
             //ToolBar.Header = config.name;
 
-            bool isLight = WindowHelper.DetermineIfInLightThemeMode();
 
             // Apply acrylic effect
             if (config.applyMica) {
@@ -112,7 +115,10 @@ namespace Ghost
             bool is_loading = processes == null;
 
             LoadingLine.Visibility = is_loading ? Visibility.Visible : Visibility.Hidden;
+            NavigationBar.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
             SearchContainer.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
+            TopInnerSettingsContainer.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
+            BottomInnerSettingsContainer.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
         }
 
         private void targetExcludeModified(object sender, RoutedEventArgs e) {
@@ -182,6 +188,28 @@ namespace Ghost
         private void refresh_list(object sender, RoutedEventArgs e) {
             Task.Run(update_processes);
             Console.WriteLine($"Manually refreshing list...");
+        }
+
+        private void drag_window(object sender, MouseButtonEventArgs e) {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void minimize_window(object sender, RoutedEventArgs e) {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        // Close with a little animation
+        private void close_window(object sender, RoutedEventArgs e) {
+            int speed_delta = 10;
+            while (this.Width > 0 && this.Height > 0 && this.Opacity > 0) {
+                this.Width -= (this.Width - 4 * speed_delta >= 0) ? 4 * speed_delta : 0;
+                this.Height -= (this.Height - 3 * speed_delta >= 0) ? 3 * speed_delta : 0;
+                this.Opacity -= 0.01 + (speed_delta / 100);
+            }
+
+            //Environment.Exit(0);
+            this.Close();
         }
     }
 }

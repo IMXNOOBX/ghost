@@ -11,7 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\close-white.png" />
+    <None Remove="assets\close.png" />
+    <None Remove="assets\minimize-white.png" />
+    <None Remove="assets\minimize.png" />
+    <None Remove="assets\no-image.png" />
+    <None Remove="assets\noimage-white.png" />
     <None Remove="assets\noimage.png" />
+    <None Remove="assets\reload-white.png" />
     <None Remove="assets\reload.png" />
     <None Remove="nubsisito.png" />
     <None Remove="reload.png" />
@@ -24,7 +31,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="assets\close-white.png" />
+    <Resource Include="assets\close.png" />
+    <Resource Include="assets\minimize-white.png" />
+    <Resource Include="assets\minimize.png" />
+    <Resource Include="assets\noimage-white.png" />
     <Resource Include="assets\noimage.png" />
+    <Resource Include="assets\reload-white.png" />
     <Resource Include="assets\reload.png" />
   </ItemGroup>
 

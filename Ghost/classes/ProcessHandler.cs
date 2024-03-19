@@ -33,9 +33,8 @@ namespace Ghost.classes
             this.name = proc.ProcessName;
             this.hwnd = proc.MainWindowHandle;
 
-            try { // This block is really resource intesive, just getting the FileName of a process takes many ms
-                this.path = proc.MainModule.FileName;
-            } catch {  }
+            // This block is really resource intesive, just getting the FileName of a process takes many ms
+            this.path = proc.MainModule.FileName;
 
             Application.Current.Dispatcher.Invoke(() => {
                 var app_icon = this.path != "Inaccesible" ? ImageSourceForBitmap(Icon.ExtractAssociatedIcon(this.path).ToBitmap()) : null;
@@ -43,7 +42,7 @@ namespace Ghost.classes
                 if (app_icon != null)
                     this.icon = ImageSourceForBitmap(Icon.ExtractAssociatedIcon(this.path).ToBitmap());
                 else
-                    this.icon = new BitmapImage(new Uri(@"assets/noimage.png", UriKind.RelativeOrAbsolute));
+                    this.icon = new BitmapImage(new Uri(@"assets/noimage-white.png", UriKind.RelativeOrAbsolute));
             });
         }
 

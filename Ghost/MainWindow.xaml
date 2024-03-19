@@ -7,11 +7,14 @@
         xmlns:sys="clr-namespace:System;assembly=netstandard"
         xmlns:hc="https://handyorg.github.io/handycontrol" 
         xmlns:localclass="clr-namespace:Ghost.classes"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500">
+
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+        MouseDown="drag_window"
+        >
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Loading Line -->
@@ -19,10 +22,54 @@
         <!-- Style="{StaticResource LoadingLineLarge}" -->
 
         <!-- Left side content -->
-        
+        <Grid Grid.Column="0" Width="Auto" Margin="6,6,3,6" x:Name="SettingsContainer" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- Right side content -->
-        <Grid Grid.Column="2" Width="Auto" Margin="6,6,6,6" Opacity="90" x:Name="SearchContainer">
+            <!-- Navigation Bar -->
+            <Grid Grid.Row="0" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="NavigationBar">
+                <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="Settings" FontSize="16" FontWeight="Bold" Foreground="White" Padding="0,0,0,3" VerticalAlignment="Center" Margin="6,4,0,4"/>
+
+                        <Button Click="minimize_window" Grid.Column="1" x:Name="MinimizeButton" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,5,6,5" BorderBrush="{x:Null}" Cursor="Hand">
+                            <Button.Background>
+                                <ImageBrush ImageSource="/assets/minimize-white.png" Stretch="UniformToFill"/>
+                            </Button.Background>
+                        </Button>
+                        <Button Click="close_window" Grid.Column="2" x:Name="CloseButton" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,5,6,5" BorderBrush="{x:Null}" Cursor="Hand">
+                            <Button.Background>
+                                <ImageBrush ImageSource="/assets/close-white.png" Stretch="UniformToFill"/>
+                            </Button.Background>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="1" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="TopInnerSettingsContainer">
+                <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
+                
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="2" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="BottomInnerSettingsContainer">
+                <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
+
+                </Border>
+            </Grid>
+        </Grid>
+
+         <!-- Right side content -->
+        <Grid Grid.Column="1" Width="Auto" Margin="3,6,12,6" x:Name="SearchContainer">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="33*"/>
@@ -31,10 +78,10 @@
 
             <!-- Search bar -->
             <StackPanel Orientation="Vertical" Grid.Row="0" ToolTip="Search applications to hide from screen capture"/>
-            <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1"  Margin="0,6,0,12">
+            <Border CornerRadius="7" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1" Margin="0,6,0,12">
                 <hc:WatermarkTextBox 
                     x:Name="SearchTextBox"
-                    Margin="6,6,6,6"
+                    Margin="6,10,6,10"
                     
                     UseLayoutRounding="True"
                     
@@ -44,7 +91,9 @@
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                     TextChanged="filterProcesses"
                     Width="Auto"
-                    Height="30"
+                    Height="Auto"
+                    
+                    MaxLength="32"
                 />
             </Border>
 
@@ -57,9 +106,13 @@
                 CanUserAddRows="False"
                 Grid.Row="1"
                 Height="Auto"
+                Width="Auto"
                 
-                Width="400" Grid.RowSpan="2"
+                CanUserResizeColumns="True"
+                MinColumnWidth="40"
+                Grid.RowSpan="2"
                 SelectionChanged="disableSelection"
+                Margin="0,0,0,6"
             >
                 <DataGrid.Columns>
                     <!-- Process Icon column -->
