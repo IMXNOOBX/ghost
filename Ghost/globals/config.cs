@@ -17,6 +17,6 @@ namespace Ghost.globals
 
         public static Vector2 windowSize = new Vector2(800, 500);
 
-        public const bool applyMica = false;
+        public const bool applyMica = true;
     }
 }

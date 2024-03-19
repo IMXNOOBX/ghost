@@ -39,7 +39,7 @@ namespace Ghost
                 NonClientFrameEdges = NonClientFrameEdges.None,
             };
 
-            //WindowChrome.SetWindowChrome(this, chrome);
+            WindowChrome.SetWindowChrome(this, chrome);
 
             InitializeComponent();
 
@@ -48,7 +48,7 @@ namespace Ghost
             this.WindowStyle = WindowStyle.SingleBorderWindow;
             this.Width = config.windowSize.X;
             this.Height = config.windowSize.Y;
-            this.Background = Brushes.Black;
+            //this.Background = Brushes.Black;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.Activate();
 
@@ -71,7 +71,8 @@ namespace Ghost
 
             check_loading();
             // Make it asyncronous
-            Utilities.SetInterval(update_processes, TimeSpan.FromSeconds(30));
+            Task.Run(update_processes);
+            //Utilities.SetInterval(update_processes, TimeSpan.FromSeconds(30));
         }
 
         public async void update_processes() {
@@ -176,6 +177,11 @@ namespace Ghost
             cache_selected_handler = ProcessDataGrid.SelectedItem as ProcessHandler;
             ProcessDataGrid.SelectedIndex = -1;
             Console.WriteLine($"Selection changed to {(cache_selected_handler != null ? cache_selected_handler.name : "was not existant")}");
+        }
+
+        private void refresh_list(object sender, RoutedEventArgs e) {
+            Task.Run(update_processes);
+            Console.WriteLine($"Manually refreshing list...");
         }
     }
 }

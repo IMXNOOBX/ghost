@@ -35,12 +35,16 @@ namespace Ghost.classes
 
             try { // This block is really resource intesive, just getting the FileName of a process takes many ms
                 this.path = proc.MainModule.FileName;
-
-                Application.Current.Dispatcher.Invoke(() => {
-                    if (this.path != null)
-                        this.icon = ImageSourceForBitmap(Icon.ExtractAssociatedIcon(this.path).ToBitmap());
-                });
             } catch {  }
+
+            Application.Current.Dispatcher.Invoke(() => {
+                var app_icon = this.path != "Inaccesible" ? ImageSourceForBitmap(Icon.ExtractAssociatedIcon(this.path).ToBitmap()) : null;
+
+                if (app_icon != null)
+                    this.icon = ImageSourceForBitmap(Icon.ExtractAssociatedIcon(this.path).ToBitmap());
+                else
+                    this.icon = new BitmapImage(new Uri(@"assets/noimage.png", UriKind.RelativeOrAbsolute));
+            });
         }
 
         public ImageSource ImageSourceForBitmap(Bitmap bmp)
@@ -61,6 +65,7 @@ namespace Ghost.classes
         }
 
         // Optimize this function, Process.GetProcesses(): ~15ms and this.get_processes(): ~350ms
+        // So far the first scan lasts ~3000ms and the next ones less than 100ms because of the cache, i can live with that
         public static List<ProcessHandler> get_processes() {
             Console.WriteLine("Getting processes list...");
             var startTime = DateTime.Now;
@@ -68,18 +73,41 @@ namespace Ghost.classes
             List<ProcessHandler> processes = new List<ProcessHandler>();
             int cached_processes = 0;
 
-            var pList = System.Diagnostics.Process.GetProcesses();
-
             Console.WriteLine($"Diagnostics Process List recived in {(DateTime.Now - startTime).TotalMilliseconds}ms");
 
             foreach (var proc in System.Diagnostics.Process.GetProcesses()) {
+                if ( // These are system processes and take too long to process
+                    proc.ProcessName == "svchost" || 
+                    proc.ProcessName == "System" || 
+                    proc.ProcessName == "Registry" ||
+                    proc.ProcessName == "Idle" ||
+                    proc.ProcessName == "LsaIso" ||
+                    proc.ProcessName == "vshost" ||
+                    proc.ProcessName == "WUDFHost" ||
+                    proc.ProcessName == "Secure System" ||
+                    proc.ProcessName == "smss" ||
+                    proc.ProcessName == "csrss" ||
+                    proc.ProcessName == "wininit" ||
+                    proc.ProcessName == "services" ||
+                    proc.ProcessName == "lsass" ||
+                    proc.ProcessName == "lsm" ||
+                    proc.ProcessName == "winlogon" ||
+                    proc.ProcessName == "fontdrvhost" ||
+                    proc.ProcessName == "dwm" ||
+                    proc.ProcessName == "WmiPrvSE"
+                    )
+                    continue;
+ 
                 var procStartTime = DateTime.Now;
-                var existingProcess = cache_processes.Find(p => p.pid == proc.Id);
-                Console.WriteLine($"Processed cache in {(DateTime.Now - procStartTime).TotalMilliseconds}ms");
+                var cachedProcess = cache_processes.Find(p => p.name == proc.ProcessName);
+                var existingProcess = processes.Find((p) => p.name == proc.ProcessName) != null;
 
-                if (existingProcess != null) {
+                if (existingProcess)
+                    continue;
+
+                if (cachedProcess != null) {
                     cached_processes++;
-                    processes.Add(existingProcess);
+                    processes.Add(cachedProcess);
                     Console.WriteLine($"Processed from cache {proc.ProcessName}({proc.Id}) in {(DateTime.Now - procStartTime).TotalMilliseconds}ms/{(DateTime.Now - startTime).TotalMilliseconds}ms");
                     continue;
                 }
@@ -89,13 +117,13 @@ namespace Ghost.classes
                     // When creating ProcessHandler we access the MainModule.FileName property,
                     // which throws an exception if the process is not accessible which is accessible but still throws an exception
                     // Please help me fix this
-                    if (
-                        proc.MainModule != null &&
-                        processes.Find((p) => p.pid == proc.Id) == null
-                        )
-                        processes.Add(new ProcessHandler(proc));
+                    //if (
+                    //    // proc.MainModule != null &&
+                    //    )
+                    processes.Add(new ProcessHandler(proc));
                 } catch {  }
-                Console.WriteLine($"Processed {proc.ProcessName}({proc.Id}) in {(DateTime.Now - procStartTime).TotalMilliseconds.CastTo<int>}ms/{(DateTime.Now - startTime).TotalMilliseconds}ms");
+
+                Console.WriteLine($"Processed {proc.ProcessName}({proc.Id}) in {(DateTime.Now - procStartTime).TotalMilliseconds}ms/{(DateTime.Now - startTime).TotalMilliseconds}ms");
             }
 
             Console.WriteLine($"Cached processes: {cached_processes} out of {processes.Count - cached_processes}");

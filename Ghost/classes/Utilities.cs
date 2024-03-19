@@ -12,11 +12,16 @@ namespace Ghost.classes
             return System.Diagnostics.Process.GetProcessesByName(processName).Length > 0;
         }
 
+        public static bool IsProcessRunning(int processId)
+        {
+            return System.Diagnostics.Process.GetProcessById(processId) != null;
+        }
+
         public static async Task SetInterval(Action action, TimeSpan timeout) {
 
             action();
 
-            await Task.Delay(timeout).ConfigureAwait(false); // This should go over the action() call, but for lazyness i prefer to keep it here
+            await Task.Delay(timeout); // This should go over the action() call, but for lazyness i prefer to keep it here
 
             SetInterval(action, timeout);
         }
