@@ -2,17 +2,21 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="assets\close-white.png" />
     <None Remove="assets\close.png" />
+    <None Remove="assets\invisible-white.png" />
+    <None Remove="assets\invisible.png" />
     <None Remove="assets\minimize-white.png" />
     <None Remove="assets\minimize.png" />
     <None Remove="assets\no-image.png" />
@@ -25,14 +29,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <COMReference Include="{000204ef-0000-0000-c000-000000000046}">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>6</VersionMajor>
+      <Guid>000204ef-0000-0000-c000-000000000046</Guid>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="HandyControls" Version="3.5.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="assets\close-white.png" />
     <Resource Include="assets\close.png" />
+    <Resource Include="assets\invisible-white.png" />
+    <Resource Include="assets\invisible.png" />
     <Resource Include="assets\minimize-white.png" />
     <Resource Include="assets\minimize.png" />
     <Resource Include="assets\noimage-white.png" />

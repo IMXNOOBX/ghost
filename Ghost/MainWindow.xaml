@@ -9,8 +9,12 @@
         xmlns:localclass="clr-namespace:Ghost.classes"
 
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+        AllowsTransparency="True"
         MouseDown="drag_window"
         >
+    <Window.Background>
+        <SolidColorBrush Color="White" Opacity="0.7"/>
+    </Window.Background>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -18,7 +22,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Loading Line -->
-        <hc:LoadingLine Grid.ColumnSpan="2" x:Name="LoadingLine" Height="10" Width="Auto" VerticalAlignment="Center" Foreground="MidnightBlue" />
+        <hc:LoadingLine Grid.ColumnSpan="2" x:Name="LoadingLine" Height="10" Width="Auto" VerticalAlignment="Center" Foreground="White" DotSpeed="3" />
         <!-- Style="{StaticResource LoadingLineLarge}" -->
 
         <!-- Left side content -->
@@ -31,7 +35,7 @@
 
             <!-- Navigation Bar -->
             <Grid Grid.Row="0" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="NavigationBar">
-                <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
+                <Border CornerRadius="7" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -39,7 +43,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="Settings" FontSize="16" FontWeight="Bold" Foreground="White" Padding="0,0,0,3" VerticalAlignment="Center" Margin="6,4,0,4"/>
+                        <TextBlock Grid.Column="0" x:Name="AppTitle" Text="" FontSize="12" FontWeight="DemiBold" Foreground="#5D5DFF" Padding="0,0,0,1" VerticalAlignment="Center" Margin="6,4,0,4"/>
 
                         <Button Click="minimize_window" Grid.Column="1" x:Name="MinimizeButton" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,5,6,5" BorderBrush="{x:Null}" Cursor="Hand">
                             <Button.Background>
@@ -57,13 +61,84 @@
 
             <Grid Grid.Row="1" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="TopInnerSettingsContainer">
                 <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
-                
+                    <Grid>
+                        <Image Source="assets/reload-white.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
+                        <TextBlock Text="Application" Margin="24,-10,270,189" Foreground="White" />
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <CheckBox x:Name="bHideSelf" Margin="6,16,0,0" Content="Hide This Application" />
+
+                                    <ComboBox x:Name="i2OverlayType" Margin="6,6,0,0">
+                                        <ComboBoxItem Content="Over"/>
+                                        <ComboBoxItem Content="Top Most"/>
+                                    </ComboBox>
+                                    <!--<CheckBox x:Name="bAutoSaveSettings" Margin="6,6,0,0" Content="Auto save settings" /> -->
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Grid.Row="1" CornerRadius="10" Background="#FF232323" BorderBrush="#FF3F3F46" BorderThickness="1" Margin="1">
+                                <StackPanel>
+                                    <TextBlock Text="CPU Usage" Margin="6,6,0,0" Foreground="White" FontSize="10" />
+                                    <ProgressBar x:Name="cpuProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
+                                    <TextBlock Text="RAM Usage" Margin="6,0,0,0" Foreground="White" FontSize="10" />
+                                    <ProgressBar x:Name="ramProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
 
             <Grid Grid.Row="2" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="BottomInnerSettingsContainer">
                 <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
+                    <Grid>
+                        <Image Source="assets/reload-white.png" Width="32" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
+                        <TextBlock Text="Settings" Margin="24,-10,265,189" Foreground="White" />
 
+                        <Grid> <!-- Separate in two rows -->
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0"> <!-- Separate in two columns -->
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0">
+                                    <CheckBox x:Name="bAutoRunOnStartup" Margin="6,16,0,0" Content="Run on Startup" />
+                                    <CheckBox x:Name="bSaveOnExit" Margin="6,6,0,0" Content="Save On Exit" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <CheckBox x:Name="bHiddenIndicator" Margin="6,16,0,0" Content="Show hidden indicator" />
+                                    <CheckBox x:Name="bOnlyTopWindow" Margin="6,6,0,0" Content="Only top window" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="1"> <!-- Bottom row for the buttons -->
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" x:Name="ManualSaveSettings" Click="misc_button_click" Content="Save Settings" BorderBrush="#00FF00" HorizontalAlignment="Center" Margin="6"/>
+                                <Button Grid.Column="1" x:Name="OpenGithub" Click="misc_button_click" Content=" Github Repository" BorderBrush="#5D5DFF" HorizontalAlignment="Center" Margin="6"/>
+                                <Button Grid.Column="2" x:Name="ReportIssue" Click="misc_button_click" Content="Report An Issue" BorderBrush="#5D5DFF" HorizontalAlignment="Center" Margin="6"/>
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
         </Grid>
@@ -93,7 +168,7 @@
                     Width="Auto"
                     Height="Auto"
                     
-                    MaxLength="32"
+                    MaxLength="32" SelectionOpacity="1" BorderBrush="White"
                 />
             </Border>
 
@@ -159,7 +234,7 @@
                     </TransformGroup>
                 </Button.RenderTransform>
                 <Button.Background>
-                    <ImageBrush ImageSource="assets/reload.png"/>
+                    <ImageBrush ImageSource="assets/reload-white.png"/>
                 </Button.Background>
                 <Button.Triggers>
                     <EventTrigger RoutedEvent="Button.Click">

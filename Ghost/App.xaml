@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <hc:ThemeResources RequestedTheme="Dark" AccentColor="MidnightBlue"/>
+                <hc:ThemeResources RequestedTheme="Dark" AccentColor="#5D5DFF"/>
                 <hc:Theme/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

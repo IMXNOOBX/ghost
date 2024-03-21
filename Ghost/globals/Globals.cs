@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ghost.globals
 {
-    internal class config
+    internal class Globals
     {
         public const string version = "1.0.0";
         public const string name = "Ghost";
@@ -18,5 +18,9 @@ namespace Ghost.globals
         public static Vector2 windowSize = new Vector2(800, 500);
 
         public const bool applyMica = false;
+        public static bool isLight = false;
+
+        public const int ui_update_interval = 5000; // This is the interval for the UI update, in ms
+        public const int scanner_update_interval = 100; // This is the interval the app will be scanning for new processes, in ms
     }
 }

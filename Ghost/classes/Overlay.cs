@@ -1,11 +1,15 @@
-﻿using HandyControl.Tools;
+﻿using Ghost.globals;
+using HandyControl.Tools;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using WVS;
 
 namespace Ghost.classes
@@ -24,9 +28,10 @@ namespace Ghost.classes
         private IntPtr overlayHwnd;
         private Window overlayWindow;
         private BackgroundWorker bgWorker;
+        private List<Overlay> childOverlays = new List<Overlay>();
 
         public Overlay(IntPtr hwnd) {
-            Console.WriteLine($"Creating overlay for ({hwnd})");
+            Console.WriteLine($"Creating overlay for hwnd({hwnd})");
             this.hwnd = hwnd;
             CreateOverlay();
             InitBackgroundWorker();
@@ -34,11 +39,30 @@ namespace Ghost.classes
             WVS.WindowVisibilityChecker.init();
         }
 
+        public Overlay(Process process) {
+            Console.WriteLine($"Creating overlay for process({process.ProcessName})");
+            this.hwnd = process.MainWindowHandle;
+            CreateOverlay();
+            InitBackgroundWorker();
+
+            WVS.WindowVisibilityChecker.init();
+
+            if (!Config.settings.only_hide_top_window)
+                foreach (var winHandle in GetProcessWindows(process))
+                    childOverlays.Add(new Overlay(winHandle));
+        }
+
         public void destroy() {
             Console.WriteLine($"Destroying overlay for ({hwnd})");
             SetWindowProtected(false);
             bgWorker.CancelAsync();
             bgWorker.Dispose();
+
+            ProcessHandler.update_process(hwnd, false);
+
+            foreach (var overlay in childOverlays)
+                overlay.destroy();
+
             Dispatcher.Invoke(() => {
                 overlayWindow.Close();
             });
@@ -53,18 +77,31 @@ namespace Ghost.classes
                 WindowStyle = WindowStyle.None,
                 AllowsTransparency = true,
                 Background = null,
-                Topmost = true,
+                Topmost = Config.settings.overlay_type == 1,
                 Left = rect.Left,
                 Top = rect.Top,
                 Width = rect.Right - rect.Left,
                 Height = rect.Bottom - rect.Top,
                 ShowInTaskbar = false,
-                //Owner = hwnd // Ensures that overlay is always on top of main window
             };
+
+            // Ensures that overlay is always on top of main window
+            if (Config.settings.overlay_type == 0) {
+                WindowInteropHelper helper = new WindowInteropHelper(overlayWindow);
+                helper.Owner = hwnd;
+            }
 
             this.overlayHwnd = overlayWindow.GetHandle();
 
-            overlayWindow.Content = new TextBlock { Text = "This window is hidden", Padding = new Thickness(12, 4, 4, 4), Foreground = System.Windows.Media.Brushes.White };
+            if (Config.settings.show_hidden_indicator)
+                overlayWindow.Content = new Image { 
+                    Source = new BitmapImage(new Uri("pack://application:,,,/assets/invisible-white.png")), 
+                    Stretch = System.Windows.Media.Stretch.Fill,
+                    Width = 16, Height = 16,
+                    Margin = new Thickness(0, 12, 0, 0),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Top
+                };
 
             overlayWindow.Show();
 
@@ -106,12 +143,10 @@ namespace Ghost.classes
                 RECT rect;
                 GetWindowRect(hwnd, out rect);
 
-
-
                 Dispatcher.Invoke(() => {
                     // Check with diferent methods if the target window is visible on screen
                     // Thanks to: https://github.com/Real-Gollum/Window-Visibility-Detector
-                    bool isVisible = WVS.WindowVisibilityChecker.IsWindowVisibleOnScreen(hwnd);
+                    bool isVisible = Config.settings.overlay_type == 0 || WVS.WindowVisibilityChecker.IsWindowVisibleOnScreen(hwnd); // dont check visibility if overlay is not topmost
 
                     try {
                         overlayWindow.Visibility = isVisible ? Visibility.Visible : Visibility.Hidden;
@@ -126,17 +161,40 @@ namespace Ghost.classes
                     //SetWindowPos(overlayHwnd, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, 0);
                 });
 
-                Thread.Sleep(25);
+                Thread.Sleep(10); // 25
             }
         }
 
-        public void SetWindowProtected(bool status) {
-            Console.WriteLine($"Changed ({hwnd}) display affinity to: {(status ? "Enabled" : "Disabled")}");
+        public void SetWindowProtected(bool status, IntPtr hwnd = 0) {
+            if (hwnd == 0)
+                hwnd = this.overlayHwnd;
+
+            //Console.WriteLine($"Changed ({hwnd}) display affinity to: {(status ? "Enabled" : "Disabled")}");
 
             SetWindowDisplayAffinity(
-                overlayHwnd,
+                hwnd,
                 (status) ? WDA_MONITOR : WDA_NONE
             );
+        }
+
+        public static List<IntPtr> GetProcessWindows(int processId, bool visibleOnly = true)
+        {
+            List<IntPtr> windows = new List<IntPtr>();
+            EnumWindows((hWnd, lParam) =>
+            {
+                uint windowProcessId;
+                GetWindowThreadProcessId(hWnd, out windowProcessId);
+                if (windowProcessId == processId && (visibleOnly ? IsWindowVisible(hWnd) : true)) {
+                    windows.Add(hWnd);
+                }
+                return true;
+            }, IntPtr.Zero);
+            return windows;
+        }
+
+        public static List<IntPtr> GetProcessWindows(Process process)
+        {
+            return GetProcessWindows(process.Id);
         }
 
         // Windows API methods
@@ -165,6 +223,13 @@ namespace Ghost.classes
 
         [DllImport("user32.dll")]
         private static extern bool SetWindowPos(IntPtr hwnd, IntPtr hwndInsertAfter, int x, int y, int cx, int cy, uint flags);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT

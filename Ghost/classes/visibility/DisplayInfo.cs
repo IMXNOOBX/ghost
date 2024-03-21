@@ -33,7 +33,7 @@ namespace WVS {
 
         public static int numberOfDisplays;
         public static List<ScreenInfo> Screens = new List<ScreenInfo>();
-        public static int[] bounds;
+        public static int[]? bounds;
 
         static bool MonitorEnum(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData) {
             MonitorInfo mi = new MonitorInfo();

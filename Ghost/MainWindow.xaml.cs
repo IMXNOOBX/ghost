@@ -17,6 +17,9 @@ using HandyControl.Controls;
 using System.Runtime.InteropServices;
 using HandyControl.Tools.Extension;
 using System.Diagnostics;
+using System.ComponentModel;
+using System.Security.Policy;
+using System;
 
 
 namespace Ghost
@@ -26,11 +29,11 @@ namespace Ghost
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
-        private static List<ProcessHandler> processes;
+        private static List<ProcessHandler> processes = new List<ProcessHandler>();
         private static ProcessHandler? cache_selected_handler;
         public MainWindow()
         {
-            bool isLight = WindowHelper.DetermineIfInLightThemeMode();
+            Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
             {
                 CaptionHeight = 0,
@@ -41,46 +44,121 @@ namespace Ghost
                 NonClientFrameEdges = NonClientFrameEdges.None,
             };
 
-            //WindowChrome.SetWindowChrome(this, chrome);
+            WindowChrome.SetWindowChrome(this, chrome);
 
             InitializeComponent();
 
             // Set window properties
-            this.Title = config.fullName;
+            this.Closing += OnClosing;
+            this.Title = Globals.fullName;
             this.WindowStyle = WindowStyle.None; // WindowStyle.SingleBorderWindow;
-            this.Width = config.windowSize.X;
-            this.Height = config.windowSize.Y;
-            this.Background = isLight ? Brushes.White : Brushes.Black;
-            this.Opacity = 0.95;
+            this.Width = Globals.windowSize.X;
+            this.Height = Globals.windowSize.Y;
+            //this.Background = isLight ? Brushes.White : Brushes.Black;
+            //this.Opacity = 0.95;
+
+            SolidColorBrush brush = new SolidColorBrush(Globals.isLight ? Colors.White : Colors.Black);
+            brush.Opacity = 0.7;
+            this.Background = brush;
+
             this.AllowsTransparency = true;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.Activate();
 
-            // Set ToolBar properties
-            //ToolBar.Header = config.name;
-
-
             // Apply acrylic effect
-            if (config.applyMica) {
+            if (Globals.applyMica) {
                 IntPtr windowHandle = new WindowInteropHelper(this).Handle;
 
                 MicaHelper.Apply(this, BackdropType.Mica);
                 if (!MicaHelper.RemoveTitleBar(windowHandle))
                     MicaHelper.Remove(this);
 
-                if (!isLight)
+                if (!Globals.isLight)
                     MicaHelper.ApplyDarkMode(this);
+            }
+
+            // Update Ui elemets
+            {
+                AppTitle.Text = Globals.fullName;
+
+                // Read settings from previous sessions
+                Config.read();
+
+                // Hide self. statup setter & event
+                bHideSelf.IsChecked = Config.settings.self_hide; 
+                bHideSelf.Click += (s, e) => {
+                    Config.settings.self_hide = (bool)bHideSelf.IsChecked;
+                    Utilities.setVisibility(0, (uint)(Config.settings.self_hide ? 1 : 0)); // Hell this types
+                };
+                // Overlay type. statup setter & event
+                i2OverlayType.SelectedIndex = Config.settings.overlay_type;
+                i2OverlayType.SelectionChanged += (s, e) => { Config.settings.overlay_type = i2OverlayType.SelectedIndex; };
+                // Auto run on startup. statup setter & event
+                bAutoRunOnStartup.IsChecked = Startup.is_registered();
+                bAutoRunOnStartup.Click += (s, e) => {
+                    if ((bool)bAutoRunOnStartup.IsChecked)
+                        Startup.register();
+                    else
+                        Startup.unregister();
+                };
+                // Save on exit. statup setter & event
+                bSaveOnExit.IsChecked = Config.settings.save_on_exit;
+                bSaveOnExit.Click += (s, e) => { Config.settings.save_on_exit = (bool)bSaveOnExit.IsChecked; };
+                // Show hidden indicator. statup setter & event
+                bHiddenIndicator.IsChecked = Config.settings.show_hidden_indicator;
+                bHiddenIndicator.Click += (s, e) => { Config.settings.show_hidden_indicator = (bool)bHiddenIndicator.IsChecked; };
+                // Only hide top window. statup setter & event
+                bOnlyTopWindow.IsChecked = Config.settings.only_hide_top_window;
+                bOnlyTopWindow.Click += (s, e) => { Config.settings.only_hide_top_window = (bool)bOnlyTopWindow.IsChecked; };
             }
 
             check_loading();
             // Make it asyncronous
+            Task.Run(() => update_ui_processes());
             Task.Run(update_processes);
-            //Utilities.SetInterval(update_processes, TimeSpan.FromSeconds(30));
+            Task.Run(resources_thread);
         }
 
-        public async void update_processes() {
-            var startTime = DateTime.Now;
+        public void update_processes() {
+            foreach (var proc in System.Diagnostics.Process.GetProcesses()) {
+                if (proc.MainWindowHandle == IntPtr.Zero)
+                    continue;
 
+                // Check if the process was excluded before in the config
+                var excluded = Config.settings.protected_processes.Find(x => x.name == proc.ProcessName) != null;
+                
+                if (!excluded)
+                    continue;
+
+                //Console.WriteLine($"Found process {proc.ProcessName}({proc.Id})");
+
+                // If the process is already in the list and its already excluded, we skip it
+                var lExclude = ProcessHandler.cache_processes.Find(x => x.name == proc.ProcessName);
+
+                //Console.WriteLine($"Found cached process {lExclude}({lExclude?.name}) and its {(lExclude?.excluded == true ? "Excluded" : "Not Excludedd")}");
+
+                if (lExclude != null && lExclude.excluded)
+                    continue;
+
+                // If the process was in the configuration and its not excluded, we need to exclude it
+                Application.Current.Dispatcher.Invoke(() => {
+                    var overlay = new Overlay(proc);
+                    if (lExclude != null) {
+                        lExclude.overlay = overlay;
+                        lExclude.excluded = true;
+                    }
+                    else
+                        ProcessHandler.update_process(proc, true, overlay);
+                });
+
+            }
+
+            Thread.Sleep(Globals.scanner_update_interval);
+            update_processes();
+        }
+
+
+        public void update_ui_processes(bool recursive = true) {
             processes = ProcessHandler.get_processes();
 
             Application.Current.Dispatcher.Invoke(() => {
@@ -105,10 +183,14 @@ namespace Ghost
                 //ProcessDataGrid.Items.DeferRefresh();
             });
 
-            Console.WriteLine($"Processes list added into ui in {(DateTime.Now - startTime).TotalMilliseconds}ms");
             Application.Current.Dispatcher.Invoke(() => {
                 check_loading();
             });
+
+            Thread.Sleep(Globals.ui_update_interval);
+
+            if (recursive)
+                update_ui_processes();
         }
 
         public void check_loading() {
@@ -122,9 +204,10 @@ namespace Ghost
         }
 
         private void targetExcludeModified(object sender, RoutedEventArgs e) {
-            //var item = processes.ElementAt(cache_index); // (ProcessHandler)ProcessDataGrid.SelectedItem;
+
+            // Filter out invalid selected processes
             var item = cache_selected_handler;
-            Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "is not existant")}");
+            //Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "is not existant")}");
 
             if (item == null)
                 return;
@@ -137,13 +220,23 @@ namespace Ghost
             // process.excluded is already modified with the status we want to change to
             //                                                              before                                            after
             Console.WriteLine($"Found process {process.name}({process.pid}) [{(!process.excluded ? "hidden" : "visible")}] => [{(process.excluded ? "hidden" : "visible")}]");
-            //process.excluded = !process.excluded;
 
             if (process.overlay != null)
                 process.overlay.destroy();
+            //else if (process.excluded)
+                //process.excluded = !process.excluded; // Block the status change
 
-            process.overlay = process.excluded ? new Overlay(process.hwnd) : null;
+            process.overlay = process.excluded ? new Overlay(process.proc) : null;
 
+            // Store the process in the protected list for next runs
+            if (process.excluded && Config.settings.protected_processes.Find(x => x.name == process.name) == null)
+                Config.settings.protected_processes
+                    .Add(new ProtectedProcess { name = process.name, path = process.path });
+            else if (!process.excluded)
+                Config.settings.protected_processes
+                    .Remove(Config.settings.protected_processes.Find(x => x.name == process.name));
+
+            // Refresh the list
             ProcessDataGrid.Items.Refresh();
             ProcessDataGrid.SelectedIndex = -1;
         }
@@ -182,11 +275,11 @@ namespace Ghost
 
             cache_selected_handler = ProcessDataGrid.SelectedItem as ProcessHandler;
             ProcessDataGrid.SelectedIndex = -1;
-            Console.WriteLine($"Selection changed to {(cache_selected_handler != null ? cache_selected_handler.name : "was not existant")}");
+            //Console.WriteLine($"Selection changed to {(cache_selected_handler != null ? cache_selected_handler.name : "was not existant")}");
         }
 
         private void refresh_list(object sender, RoutedEventArgs e) {
-            Task.Run(update_processes);
+            Task.Run(() => update_ui_processes(false));
             Console.WriteLine($"Manually refreshing list...");
         }
 
@@ -199,6 +292,15 @@ namespace Ghost
             this.WindowState = WindowState.Minimized;
         }
 
+        private void misc_button_click(object sender, RoutedEventArgs e){
+            if (sender == ManualSaveSettings)
+                Config.save();
+            else if (sender == OpenGithub)
+                Process.Start(new ProcessStartInfo { FileName = Globals.website, UseShellExecute = true });
+            else if (sender == ReportIssue)
+                Process.Start(new ProcessStartInfo { FileName = $"{Globals.website}/issues", UseShellExecute = true });
+        }
+
         // Close with a little animation
         private void close_window(object sender, RoutedEventArgs e) {
             int speed_delta = 10;
@@ -208,8 +310,32 @@ namespace Ghost
                 this.Opacity -= 0.01 + (speed_delta / 100);
             }
 
-            //Environment.Exit(0);
             this.Close();
+            Environment.Exit(0); // Fallback in case there are other windows open
+        }
+
+        private void resources_thread() {
+
+            var cpu = Utilities.get_cpu();
+            var ram = Utilities.get_ram();
+
+            // Console.WriteLine($"Current resources usage, cpu: {cpu}%, ram: {ram}%");
+
+            Application.Current.Dispatcher.Invoke(() => {
+                cpuProgressBar.Value = cpu;
+                cpuProgressBar.SetValue(HandyControl.Controls.VisualElement.TextProperty, $"{cpu:F2}%");
+                ramProgressBar.Value = ram;
+                ramProgressBar.SetValue(HandyControl.Controls.VisualElement.TextProperty, $"{ram:F2}%");
+            });
+
+            Thread.Sleep(1000);
+
+            resources_thread();
+        }
+
+        static void OnClosing(object? sender, CancelEventArgs e) {
+            if (Config.settings.save_on_exit)
+                Config.save();
         }
     }
 }
