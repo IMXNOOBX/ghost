@@ -17,6 +17,7 @@ namespace Ghost.globals
 
         public static Vector2 windowSize = new Vector2(800, 500);
 
+        public static bool silent = false; // Silent run, made for the auto start so it doesnt bother the user
         public const bool applyMica = false;
         public static bool isLight = false;
 

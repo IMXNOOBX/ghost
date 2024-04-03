@@ -31,8 +31,34 @@ namespace Ghost
     {
         private static List<ProcessHandler> processes = new List<ProcessHandler>();
         private static ProcessHandler? cache_selected_handler;
+        private static NotifyIcon notifyIcon;
         public MainWindow()
         {
+            string[] arguments = Environment.GetCommandLineArgs();
+
+            if (arguments.Length > 1 && arguments[1] == "--silent") {
+                Globals.silent = true;
+                Console.WriteLine("Running in silent mode...");
+            }
+
+            // Hide window if it was started in silent mode. (Auto start)
+            if (Globals.silent)
+                this.Visibility = Visibility.Hidden;
+
+            notifyIcon = new NotifyIcon();
+            //notifyIcon.Icon = new BitmapImage(new Uri("pack://application:,,,/assets/invisible-white.png"));
+            notifyIcon.Text = "Test Tray";
+            //notifyIcon.Visibility = Visibility.Visible;
+            notifyIcon.ContextMenu = new ContextMenu();
+            notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Exit" });
+            notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Settings" });
+            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "About" });
+            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Help" });
+            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Report Issue" });
+            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Check for updates" });
+            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Open Github" });
+
+
             Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
             {
@@ -235,7 +261,7 @@ namespace Ghost
             else if (!process.excluded)
                 Config.settings.protected_processes
                     .Remove(Config.settings.protected_processes.Find(x => x.name == process.name));
-
+             
             // Refresh the list
             ProcessDataGrid.Items.Refresh();
             ProcessDataGrid.SelectedIndex = -1;

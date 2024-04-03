@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,10 +34,12 @@ namespace Ghost.classes
                 if (key == null)
                     return false;
 
+                var full_path = (path.Contains(".dll")) ?
+                        path.Replace(".dll", ".exe") : path;
+
                 key.SetValue(
                     Globals.name, 
-                    (path.Contains(".dll")) ? 
-                        path.Replace(".dll", ".exe") : path
+                    $"\"{full_path}\" --silent"
                 );
 
                 return true;
