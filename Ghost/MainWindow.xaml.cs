@@ -20,6 +20,8 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Security.Policy;
 using System;
+using System.Reflection;
+using System.Drawing;
 
 
 namespace Ghost
@@ -31,7 +33,7 @@ namespace Ghost
     {
         private static List<ProcessHandler> processes = new List<ProcessHandler>();
         private static ProcessHandler? cache_selected_handler;
-        private static NotifyIcon notifyIcon;
+        private static TrayUtils trayIcon;
         public MainWindow()
         {
             string[] arguments = Environment.GetCommandLineArgs();
@@ -45,19 +47,10 @@ namespace Ghost
             if (Globals.silent)
                 this.Visibility = Visibility.Hidden;
 
-            notifyIcon = new NotifyIcon();
-            //notifyIcon.Icon = new BitmapImage(new Uri("pack://application:,,,/assets/invisible-white.png"));
-            notifyIcon.Text = "Test Tray";
-            //notifyIcon.Visibility = Visibility.Visible;
-            notifyIcon.ContextMenu = new ContextMenu();
-            notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Exit" });
-            notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Settings" });
-            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "About" });
-            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Help" });
-            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Report Issue" });
-            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Check for updates" });
-            //notifyIcon.ContextMenu.Items.Add(new MenuItem { Header = "Open Github" });
-
+            /**
+             * Register the tray icon
+             */
+            trayIcon = new TrayUtils(this);
 
             Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
