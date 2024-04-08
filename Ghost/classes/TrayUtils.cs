@@ -17,6 +17,11 @@ namespace Ghost.classes
     {
         private static NotifyIcon trayIcon;
         private static MainWindow mainWindow;
+
+        private static BitmapImage open_image;
+        private static BitmapImage github_image;
+        private static BitmapImage close_image;
+
         public TrayUtils(MainWindow mw) {
             if (trayIcon != null)
                 return;
@@ -30,19 +35,23 @@ namespace Ghost.classes
             trayIcon.ToolTip = Globals.name;
             //trayIcon.IsBlink = true;
 
+            open_image = new BitmapImage(new Uri("pack://application:,,,/assets/application-white.png"));
+            github_image = new BitmapImage(new Uri("pack://application:,,,/assets/github-white.png"));
+            close_image = new BitmapImage(new Uri("pack://application:,,,/assets/close-white.png"));
+
             init_options();
         }
 
         private void init_options() {
             trayIcon.ContextMenu = new ContextMenu();
 
-            var open = new MenuItem { Header = "Open" };
-            var open_github = new MenuItem { Header = "Open Github" };
+            var open = new MenuItem { Header = "Open", Icon = new System.Windows.Controls.Image { Source = open_image } };
+            var open_github = new MenuItem { Header = "Open Github", Icon = new System.Windows.Controls.Image { Source = github_image } };
             
-            var settings = new MenuItem { Header = "Settings" };
-            var settings_uninstall = new MenuItem { Header = "Uninstall" };
+            var settings = new MenuItem { Header = "Settings", Icon = "\\" };
+            var settings_uninstall = new MenuItem { Header = "Uninstall", Icon = ":C" };
 
-            var exit = new MenuItem { Header = "Exit", Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location) };
+            var exit = new MenuItem { Header = "Exit", Icon = new System.Windows.Controls.Image { Source = close_image } };
 
             /**
              * Event handlers
@@ -51,14 +60,13 @@ namespace Ghost.classes
                 mainWindow.Show();
             };
             open_github.Click += (sender, e) => {
-                Process.Start(new ProcessStartInfo { FileName = Globals.website, UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = Globals.repository, UseShellExecute = true });
             };
             settings_uninstall.Click += (sender, e) => {
-                Console.WriteLine("Open clicked");
                 var result = MessageBox.Ask($"Are you sure you want to uninstall {Globals.name}?", "Uninstall");
 
                 if (result == System.Windows.MessageBoxResult.OK) {
-
+                    Utilities.Uninstall();
                 }
             };
             exit.Click += (sender, e) => {

@@ -26,6 +26,8 @@ namespace Ghost.classes
         public bool save_on_exit { get; set; } = false;
         public bool show_hidden_indicator { get; set; } = true;
         public bool only_hide_top_window { get; set; } = true;
+        public int ui_update_interval { get; set; } = 5000;
+        public int scanner_update_interval { get; set; } = 100;
 
         public int overlay_type { get; set; } = 0; // 0 = over, 1 = topmost
         public List<ProtectedProcess> protected_processes { get; set; } = new List<ProtectedProcess>();

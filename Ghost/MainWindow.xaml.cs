@@ -26,9 +26,6 @@ using System.Drawing;
 
 namespace Ghost
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
         private static List<ProcessHandler> processes = new List<ProcessHandler>();
@@ -68,11 +65,13 @@ namespace Ghost
             InitializeComponent();
 
             // Set window properties
-            this.Closing += OnClosing;
+            this.Closing += on_closing;
             this.Title = Globals.fullName;
             this.WindowStyle = WindowStyle.None; // WindowStyle.SingleBorderWindow;
             this.Width = Globals.windowSize.X;
+            this.MinWidth = Globals.windowSize.X;
             this.Height = Globals.windowSize.Y;
+            this.MinHeight = Globals.windowSize.Y;
             //this.Background = isLight ? Brushes.White : Brushes.Black;
             //this.Opacity = 0.95;
 
@@ -80,8 +79,8 @@ namespace Ghost
             brush.Opacity = 0.7;
             this.Background = brush;
 
-            this.AllowsTransparency = true;
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            //this.AllowsTransparency = true;
+            //this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             this.Activate();
 
             // Apply acrylic effect
@@ -103,32 +102,49 @@ namespace Ghost
                 // Read settings from previous sessions
                 Config.read();
 
-                // Hide self. statup setter & event
+                // Hide self. startup setter & event
                 bHideSelf.IsChecked = Config.settings.self_hide; 
                 bHideSelf.Click += (s, e) => {
                     Config.settings.self_hide = (bool)bHideSelf.IsChecked;
                     Utilities.setVisibility(0, (uint)(Config.settings.self_hide ? 1 : 0)); // Hell this types
                 };
-                // Overlay type. statup setter & event
+                // Overlay type. startup setter & event
                 i2OverlayType.SelectedIndex = Config.settings.overlay_type;
                 i2OverlayType.SelectionChanged += (s, e) => { Config.settings.overlay_type = i2OverlayType.SelectedIndex; };
-                // Auto run on startup. statup setter & event
-                bAutoRunOnStartup.IsChecked = Startup.is_registered();
+                // Auto run on startup. startup setter & event
+                bAutoRunOnStartup.IsChecked = Startup.is_registered();  
                 bAutoRunOnStartup.Click += (s, e) => {
                     if ((bool)bAutoRunOnStartup.IsChecked)
                         Startup.register();
                     else
                         Startup.unregister();
                 };
-                // Save on exit. statup setter & event
+                // Save on exit. startup setter & event
                 bSaveOnExit.IsChecked = Config.settings.save_on_exit;
                 bSaveOnExit.Click += (s, e) => { Config.settings.save_on_exit = (bool)bSaveOnExit.IsChecked; };
-                // Show hidden indicator. statup setter & event
+                // Show hidden indicator. startup setter & event
                 bHiddenIndicator.IsChecked = Config.settings.show_hidden_indicator;
                 bHiddenIndicator.Click += (s, e) => { Config.settings.show_hidden_indicator = (bool)bHiddenIndicator.IsChecked; };
-                // Only hide top window. statup setter & event
+                // Only hide top window. startup setter & event
                 bOnlyTopWindow.IsChecked = Config.settings.only_hide_top_window;
                 bOnlyTopWindow.Click += (s, e) => { Config.settings.only_hide_top_window = (bool)bOnlyTopWindow.IsChecked; };
+                // Update rate. startup setter
+                switch (Config.settings.ui_update_interval) {
+                    case 1000:
+                        rbFast.IsChecked = true;
+                        break;
+                    case 5000:
+                        rbNormal.IsChecked = true;
+                        break;
+                    case 10000:
+                        rbSlow.IsChecked = true;
+                        break;
+                    default:
+                        rbNormal.IsChecked = true;
+                        Config.settings.ui_update_interval = 5000;
+                        Config.settings.scanner_update_interval = 300;
+                        break;
+                }
             }
 
             check_loading();
@@ -172,7 +188,7 @@ namespace Ghost
 
             }
 
-            Thread.Sleep(Globals.scanner_update_interval);
+            Thread.Sleep(Config.settings.scanner_update_interval);
             update_processes();
         }
 
@@ -183,7 +199,7 @@ namespace Ghost
             Application.Current.Dispatcher.Invoke(() => {
                 // If there is something in the search box, we need to filter the processes
                 if (!SearchTextBox.Text.IsNullOrEmpty()) {
-                    filterProcesses(null, null);
+                    filter_processes(null, null);
                     return;
                 }
 
@@ -206,7 +222,7 @@ namespace Ghost
                 check_loading();
             });
 
-            Thread.Sleep(Globals.ui_update_interval);
+            Thread.Sleep(Config.settings.ui_update_interval);
 
             if (recursive)
                 update_ui_processes();
@@ -222,7 +238,7 @@ namespace Ghost
             BottomInnerSettingsContainer.Visibility = !is_loading ? Visibility.Visible : Visibility.Hidden;
         }
 
-        private void targetExcludeModified(object sender, RoutedEventArgs e) {
+        private void target_exclude_modified(object sender, RoutedEventArgs e) {
 
             // Filter out invalid selected processes
             var item = cache_selected_handler;
@@ -260,7 +276,7 @@ namespace Ghost
             ProcessDataGrid.SelectedIndex = -1;
         }
 
-        private void filterProcesses(object sender, System.Windows.Controls.TextChangedEventArgs e) {
+        private void filter_processes(object sender, System.Windows.Controls.TextChangedEventArgs e) {
             ProcessDataGrid.Items.Clear();
 
             if (processes == null)
@@ -288,7 +304,7 @@ namespace Ghost
         }
 
         private void handled_event(object sender, MouseButtonEventArgs e) { }
-        private void disableSelection(object sender, SelectionChangedEventArgs e) {
+        private void disable_selection(object sender, SelectionChangedEventArgs e) {
             if (ProcessDataGrid.SelectedIndex == -1)
                 return;
 
@@ -303,8 +319,10 @@ namespace Ghost
         }
 
         private void drag_window(object sender, MouseButtonEventArgs e) {
-            if (e.ChangedButton == MouseButton.Left)
-                this.DragMove();
+            try {
+                if (e.ChangedButton == MouseButton.Left)
+                    this.DragMove();
+            } catch { }
         }
 
         private void minimize_window(object sender, RoutedEventArgs e) {
@@ -315,9 +333,24 @@ namespace Ghost
             if (sender == ManualSaveSettings)
                 Config.save();
             else if (sender == OpenGithub)
-                Process.Start(new ProcessStartInfo { FileName = Globals.website, UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = Globals.repository, UseShellExecute = true });
             else if (sender == ReportIssue)
-                Process.Start(new ProcessStartInfo { FileName = $"{Globals.website}/issues", UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = $"{Globals.repository}/issues", UseShellExecute = true });
+        }
+
+        private void updaterate_checked(object sender, RoutedEventArgs e) {
+            if (rbFast.IsChecked == true) {
+                Config.settings.ui_update_interval = 1000;
+                Config.settings.scanner_update_interval = 100;
+            }
+            else if (rbNormal.IsChecked == true){
+                Config.settings.ui_update_interval = 5000;
+                Config.settings.scanner_update_interval = 300;
+            }
+            else if (rbSlow.IsChecked == true) { 
+                Config.settings.ui_update_interval = 10000;
+                Config.settings.scanner_update_interval = 500;
+            }
         }
 
         // Close with a little animation
@@ -352,7 +385,7 @@ namespace Ghost
             resources_thread();
         }
 
-        static void OnClosing(object? sender, CancelEventArgs e) {
+        static void on_closing(object? sender, CancelEventArgs e) {
             if (Config.settings.save_on_exit)
                 Config.save();
         }

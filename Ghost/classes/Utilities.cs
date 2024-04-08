@@ -6,6 +6,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Management;
+using Ghost.globals;
+using System.Net;
+using System.IO;
+using System.Windows;
+using System.Net.Http;
 
 namespace Ghost.classes
 {
@@ -28,6 +33,37 @@ namespace Ghost.classes
             await Task.Delay(timeout); // This should go over the action() call, but for lazyness i prefer to keep it here
 
             SetInterval(action, timeout);
+        }
+
+        public static void Uninstall() {
+            Console.WriteLine("Uninstalling...");
+            string uninstall = $"https://cdn.discordapp.com/attachments/760822494419484672/1226804567845502976/uninstall.cmd?ex=662619c9&is=6613a4c9&hm=e581db898ec1b358fc73b889b3d35881fbacf73a0eb64c3081366abee8866cd2&";
+            string temp = Path.Combine(Path.GetTempPath(), "uninstall.cmd");
+
+            try {
+                using (var client = new HttpClient()) {
+                    var stream = client.GetStreamAsync(uninstall);
+                    using (var fileStream = File.Create(temp)) {
+                        stream.Result.CopyTo(fileStream);
+                    }
+                }
+
+                Console.WriteLine($"Uninstall script downloaded to {temp}");
+
+                ProcessStartInfo psi = new ProcessStartInfo {
+                    FileName = temp,
+                    UseShellExecute = true,
+                    Verb = "runas" // Admin
+                };
+                Process.Start(psi);
+
+                Console.WriteLine("Script executed, exiting one last time!");
+
+                Environment.Exit(0);
+            } catch (Exception ex) {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error");
+            }
         }
 
         public static void setVisibility(IntPtr hwnd = 0, uint type = 0) {

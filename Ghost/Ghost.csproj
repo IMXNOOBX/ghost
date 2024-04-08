@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,8 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="assets\application-white.png" />
+    <None Remove="assets\application.png" />
     <None Remove="assets\close-white.png" />
     <None Remove="assets\close.png" />
+    <None Remove="assets\github-white.png" />
+    <None Remove="assets\github.png" />
     <None Remove="assets\invisible-white.png" />
     <None Remove="assets\invisible.png" />
     <None Remove="assets\minimize-white.png" />
@@ -25,6 +29,8 @@
     <None Remove="assets\noimage.png" />
     <None Remove="assets\reload-white.png" />
     <None Remove="assets\reload.png" />
+    <None Remove="assets\settings-white.png" />
+    <None Remove="assets\settings.png" />
     <None Remove="nubsisito.png" />
     <None Remove="reload.png" />
   </ItemGroup>
@@ -46,8 +52,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="assets\application-white.png" />
+    <Resource Include="assets\application.png" />
     <Resource Include="assets\close-white.png" />
     <Resource Include="assets\close.png" />
+    <Resource Include="assets\github-white.png" />
+    <Resource Include="assets\github.png" />
     <Resource Include="assets\invisible-white.png" />
     <Resource Include="assets\invisible.png" />
     <Resource Include="assets\minimize-white.png" />
@@ -56,6 +66,8 @@
     <Resource Include="assets\noimage.png" />
     <Resource Include="assets\reload-white.png" />
     <Resource Include="assets\reload.png" />
+    <Resource Include="assets\settings-white.png" />
+    <Resource Include="assets\settings.png" />
   </ItemGroup>
 
 </Project>

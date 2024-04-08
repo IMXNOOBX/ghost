@@ -9,7 +9,10 @@
         xmlns:localclass="clr-namespace:Ghost.classes"
 
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+           
+        WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
+        
         MouseDown="drag_window"
         >
     <Window.Background>
@@ -62,7 +65,7 @@
             <Grid Grid.Row="1" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="TopInnerSettingsContainer">
                 <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
                     <Grid>
-                        <Image Source="assets/reload-white.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
+                        <Image Source="assets/application-white.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
                         <TextBlock Text="Application" Margin="24,-10,270,189" Foreground="White" />
 
                         <Grid>
@@ -86,15 +89,23 @@
                                     <!--<CheckBox x:Name="bAutoSaveSettings" Margin="6,6,0,0" Content="Auto save settings" /> -->
                                 </StackPanel>
                             </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="5" Text="Resources" Style="{StaticResource TextBlockSubTitleBold}"/>
 
-                            <Border Grid.Row="1" CornerRadius="10" Background="#FF232323" BorderBrush="#FF3F3F46" BorderThickness="1" Margin="1">
-                                <StackPanel>
-                                    <TextBlock Text="CPU Usage" Margin="6,6,0,0" Foreground="White" FontSize="10" />
-                                    <ProgressBar x:Name="cpuProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
-                                    <TextBlock Text="RAM Usage" Margin="6,0,0,0" Foreground="White" FontSize="10" />
-                                    <ProgressBar x:Name="ramProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
-                                </StackPanel>
-                            </Border>
+                                <Border Grid.Row="1" CornerRadius="10" Background="#FF232323" BorderBrush="#FF3F3F46" BorderThickness="1" Margin="1">
+                                    <StackPanel>
+                                        <TextBlock Text="CPU Usage" Margin="6,6,0,0" Foreground="White" FontSize="10" />
+                                        <ProgressBar x:Name="cpuProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
+                                        <TextBlock Text="RAM Usage" Margin="6,0,0,0" Foreground="White" FontSize="10" />
+                                        <ProgressBar x:Name="ramProgressBar" hc:VisualElement.Text="Calculating..." Height="20" VerticalAlignment="Center" Margin="6" Maximum="100"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
                         </Grid>
                     </Grid>
                 </Border>
@@ -103,31 +114,57 @@
             <Grid Grid.Row="2" Width="Auto" Height="Auto" Margin="6,6,6,6" x:Name="BottomInnerSettingsContainer">
                 <Border CornerRadius="10" Background="#FF323232" BorderBrush="#FF3F3F46" BorderThickness="1">
                     <Grid>
-                        <Image Source="assets/reload-white.png" Width="32" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
+                        <Image Source="assets/settings-white.png" Width="32" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,-11,0,6"/>
                         <TextBlock Text="Settings" Margin="24,-10,265,189" Foreground="White" />
-
-                        <Grid> <!-- Separate in two rows -->
+                        <Grid>
+                            <!-- Separate in two rows -->
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <Grid Grid.Row="0"> <!-- Separate in two columns -->
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0">
-                                    <CheckBox x:Name="bAutoRunOnStartup" Margin="6,16,0,0" Content="Run on Startup" />
-                                    <CheckBox x:Name="bSaveOnExit" Margin="6,6,0,0" Content="Save On Exit" />
-                                </StackPanel>
+                            <Grid Grid.Row="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Column="1">
-                                    <CheckBox x:Name="bHiddenIndicator" Margin="6,16,0,0" Content="Show hidden indicator" />
-                                    <CheckBox x:Name="bOnlyTopWindow" Margin="6,6,0,0" Content="Only top window" />
+                                <Grid Grid.Row="0">
+                                    <TextBlock HorizontalAlignment="Center" Text="Application" Style="{StaticResource TextBlockSubTitleBold}"/>
+                                </Grid>
+
+                                <!-- Separate in two columns -->
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <CheckBox x:Name="bAutoRunOnStartup" Margin="6,16,0,0" Content="Run on Startup" />
+                                        <CheckBox x:Name="bSaveOnExit" Margin="6,6,0,0" Content="Save On Exit" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1">
+                                        <CheckBox x:Name="bHiddenIndicator" Margin="6,16,0,0" Content="Show hidden indicator" />
+                                        <CheckBox x:Name="bOnlyTopWindow" Margin="6,6,0,0" Content="Only top window" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="10"> <!-- Second row for other options -->
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock HorizontalAlignment="Center" Margin="10" Text="Update Rate" Style="{StaticResource TextBlockSubTitleBold}"/>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <RadioButton x:Name="rbFast" Margin="16,0,16,0" Content="Fast (1/1s)"   Checked="updaterate_checked"/>
+                                    <RadioButton x:Name="rbNormal" Margin="16,0,16,0" Content="Normal (1/5s)" Checked="updaterate_checked" IsChecked="True"/>
+                                    <RadioButton x:Name="rbSlow" Margin="16,0,16,0" Content="Slow (1/10s)"  Checked="updaterate_checked"/>
                                 </StackPanel>
                             </Grid>
-                            <Grid Grid.Row="1"> <!-- Bottom row for the buttons -->
+                            <Grid Grid.Row="3">
+                                <!-- Bottom row for the buttons -->
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -143,7 +180,7 @@
             </Grid>
         </Grid>
 
-         <!-- Right side content -->
+        <!-- Right side content -->
         <Grid Grid.Column="1" Width="Auto" Margin="3,6,12,6" x:Name="SearchContainer">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -164,7 +201,7 @@
                     
                     Watermark="Search any application..."
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                    TextChanged="filterProcesses"
+                    TextChanged="filter_processes"
                     Width="Auto"
                     Height="Auto"
                     
@@ -186,7 +223,7 @@
                 CanUserResizeColumns="True"
                 MinColumnWidth="40"
                 Grid.RowSpan="2"
-                SelectionChanged="disableSelection"
+                SelectionChanged="disable_selection"
                 Margin="0,0,0,6"
             >
                 <DataGrid.Columns>
@@ -206,13 +243,13 @@
                     <DataGridTextColumn Width="1*" Header="Name" CanUserResize="True" Binding="{Binding name}"/>
 
                     <!-- Hidden Select column -->
-                    <!-- <DataGridCheckBoxColumn Width="100" CanUserResize="False" Checked="targetExcludeModified" Binding="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" Header="Is Hidden"/> -->
+                    <!-- <DataGridCheckBoxColumn Width="100" CanUserResize="False" Checked="target_exclude_modified" Binding="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" Header="Is Hidden"/> -->
                     <DataGridTemplateColumn Width="100" CanUserResize="False" Header="Is Hidden">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsChecked="{Binding excluded, UpdateSourceTrigger=PropertyChanged}" 
                                   IsEnabled="{Binding Path=DataContext.IsEnabled, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                  Click="targetExcludeModified"
+                                  Click="target_exclude_modified"
                                           />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
