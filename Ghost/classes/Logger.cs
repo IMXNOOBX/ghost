@@ -14,6 +14,9 @@ namespace Ghost.classes
     {
         private static string path;
 
+        /**
+         * @brief Initializes the logger and creates the log file for the current session
+         */
         static logger()
         {
             string appDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -30,6 +33,9 @@ namespace Ghost.classes
             path = Path.Combine(path, session_file);
         }
 
+        /**
+         * @brief Logs a message to the console and to the log file with the current time and date
+         */
         private static void cout(string log, ConsoleColor color) {
             string message = $"[{DateTime.Now}] {log}";
             
@@ -42,11 +48,17 @@ namespace Ghost.classes
             }
         }
 
+        /**
+         * @brief Allocates a console for the application
+         */
         public static void allocConsole() {
             AllocConsole();
             Console.Title = Globals.name + " | Debug Console";
         }
 
+        /**
+         * @brief Different log levels for the application
+         */
         public static void log(string message) {
             cout($"[LOG] {message}", ConsoleColor.Blue);
         }

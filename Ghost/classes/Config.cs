@@ -18,6 +18,9 @@ namespace Ghost.classes
         public ProtectedProcess() { }
     }
 
+    /**
+    * @brief Settings class for the application
+    */
     public class Settings {
         public bool apply_mica { get; set; } = false;
         public bool dark_theme { get; set; } = true;
@@ -40,6 +43,9 @@ namespace Ghost.classes
         private static string path;
         public static Settings settings = new Settings();
 
+        /**
+         * @brief Returns the path to the appdata folder with the ghost folder
+         */
         private static string appdata() {
             if (Directory.Exists(path))
                 return path;
@@ -55,6 +61,9 @@ namespace Ghost.classes
             return appFolder;
         }
 
+        /**
+         * @brief Saves the current settings to the config file
+         */
         public static bool save() {
             if (path.IsNullOrEmpty())
                 appdata();
@@ -73,7 +82,9 @@ namespace Ghost.classes
 
             return true;
         }
-
+        /**
+         * @brief Reads the settings from the config file
+         */
         public static Settings read() {
             if (path.IsNullOrEmpty())
                 appdata();

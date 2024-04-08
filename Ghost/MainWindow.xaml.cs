@@ -33,6 +33,9 @@ namespace Ghost
         private static TrayUtils trayIcon;
         public MainWindow()
         {
+            /**
+             * @brief Check command line parameters for silent mode flag
+             */
             string[] arguments = Environment.GetCommandLineArgs();
 
             if (arguments.Length > 1 && arguments[1] == "--silent") {
@@ -40,12 +43,14 @@ namespace Ghost
                 logger.warn("Running in silent mode...");
             }
 
-            // Hide window if it was started in silent mode. (Auto start)
+            /**
+             * @brief Hide window if it was started in silent mode. (Auto start)
+             */
             if (Globals.silent)
                 this.Visibility = Visibility.Hidden;
 
             /**
-             * Register the tray icon
+             * @brief Register the tray icon
              */
             trayIcon = new TrayUtils(this);
 

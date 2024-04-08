@@ -34,10 +34,12 @@ namespace Ghost.classes
 
             SetInterval(action, timeout);
         }
-
+        /**
+         * @brief downloads the uninstall script and runs it
+         */
         public static void Uninstall() {
             logger.warn("Uninstalling...");
-            string uninstall = $"https://cdn.discordapp.com/attachments/760822494419484672/1226804567845502976/uninstall.cmd?ex=662619c9&is=6613a4c9&hm=e581db898ec1b358fc73b889b3d35881fbacf73a0eb64c3081366abee8866cd2&";
+            string uninstall = $"{Globals.repository}/raw/main/installer/uninstall.cmd";
             string temp = Path.Combine(Path.GetTempPath(), "uninstall.cmd");
 
             try {
@@ -65,7 +67,11 @@ namespace Ghost.classes
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error");
             }
         }
-
+        /**
+         * @brief Set the visibility of the window
+         * @param hwnd The handle of the window
+         * @param type The type of visibility
+         */
         public static void setVisibility(IntPtr hwnd = 0, uint type = 0) {
             if (type == 0)
                 type = 0x0;
@@ -80,6 +86,9 @@ namespace Ghost.classes
             SetWindowDisplayAffinity(hwnd, type);
         }
 
+        /**
+         * @brief Get the current CPU usage
+         */
         public static float get_cpu()
         {
             using (PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total")) {
@@ -110,6 +119,9 @@ namespace Ghost.classes
             return 0;
         }
 
+        /**
+         * #brief Get the current RAM usage
+         */
         public static float get_ram()
         {
             using (Process self = Process.GetCurrentProcess()) {

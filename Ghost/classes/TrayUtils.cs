@@ -42,6 +42,9 @@ namespace Ghost.classes
             init_options();
         }
 
+        /**
+         * @brief Initializes the tray icon options
+         */
         private void init_options() {
             trayIcon.ContextMenu = new ContextMenu();
 
@@ -54,7 +57,7 @@ namespace Ghost.classes
             var exit = new MenuItem { Header = "Exit", Icon = new System.Windows.Controls.Image { Source = close_image } };
 
             /**
-             * Event handlers
+             * @brief Event handlers
              */
             open.Click += (sender, e) => {
                 mainWindow.Show();
@@ -75,7 +78,7 @@ namespace Ghost.classes
 
 
             /**
-             * Add the menu items to the tray icon
+             * @brief Add the menu items to the tray icon
              */
             trayIcon.ContextMenu.Items.Add(open);
             trayIcon.ContextMenu.Items.Add(open_github);

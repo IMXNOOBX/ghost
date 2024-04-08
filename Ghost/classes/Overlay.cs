@@ -52,6 +52,9 @@ namespace Ghost.classes
                     childOverlays.Add(new Overlay(winHandle));
         }
 
+        /**
+         * @brief Destroys the overlay and all child overlays
+         */
         public void destroy() {
             logger.log($"Destroying overlay for ({hwnd})");
             SetWindowProtected(false);
@@ -68,6 +71,9 @@ namespace Ghost.classes
             });
         }
 
+        /**
+         * @brief Creates the overlay window
+         */
         private Window CreateOverlay() {
             RECT rect;
             GetWindowRect(hwnd, out rect);
@@ -117,6 +123,9 @@ namespace Ghost.classes
             return overlayWindow;
         }
 
+        /**
+         * @brief Initializes the background worker
+         */
         private void InitBackgroundWorker() {
             bgWorker = new BackgroundWorker();
             bgWorker.WorkerReportsProgress = false;
@@ -125,6 +134,9 @@ namespace Ghost.classes
             bgWorker.RunWorkerAsync();
         }
 
+        /**
+         * @brief Updates the overlay position
+         */
         private void UpdateOverlay(object sender, DoWorkEventArgs e) {
             while (!bgWorker.CancellationPending) {
                 if (overlayWindow == null)
@@ -165,6 +177,9 @@ namespace Ghost.classes
             }
         }
 
+        /**
+         * @brief Sets the overlay window protected by hiding it from screen capture with WDA_MONITOR flag
+         */
         public void SetWindowProtected(bool status, IntPtr hwnd = 0) {
             if (hwnd == 0)
                 hwnd = this.overlayHwnd;
@@ -177,6 +192,9 @@ namespace Ghost.classes
             );
         }
 
+         /**
+         * @brief Get all windows of a process
+         */
         public static List<IntPtr> GetProcessWindows(int processId, bool visibleOnly = true)
         {
             List<IntPtr> windows = new List<IntPtr>();
@@ -192,6 +210,9 @@ namespace Ghost.classes
             return windows;
         }
 
+         /**
+         * @brief Get all windows of a process
+         */
         public static List<IntPtr> GetProcessWindows(Process process)
         {
             return GetProcessWindows(process.Id);
