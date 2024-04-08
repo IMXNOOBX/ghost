@@ -31,7 +31,7 @@ namespace Ghost.classes
         private List<Overlay> childOverlays = new List<Overlay>();
 
         public Overlay(IntPtr hwnd) {
-            Console.WriteLine($"Creating overlay for hwnd({hwnd})");
+            logger.log($"Creating overlay for hwnd({hwnd})");
             this.hwnd = hwnd;
             CreateOverlay();
             InitBackgroundWorker();
@@ -40,7 +40,7 @@ namespace Ghost.classes
         }
 
         public Overlay(Process process) {
-            Console.WriteLine($"Creating overlay for process({process.ProcessName})");
+            logger.log($"Creating overlay for process({process.ProcessName})");
             this.hwnd = process.MainWindowHandle;
             CreateOverlay();
             InitBackgroundWorker();
@@ -53,7 +53,7 @@ namespace Ghost.classes
         }
 
         public void destroy() {
-            Console.WriteLine($"Destroying overlay for ({hwnd})");
+            logger.log($"Destroying overlay for ({hwnd})");
             SetWindowProtected(false);
             bgWorker.CancelAsync();
             bgWorker.Dispose();
@@ -112,7 +112,7 @@ namespace Ghost.classes
 
             SetWindowProtected(true);
 
-            Console.WriteLine($"Overlay created successfully for ({hwnd}) with handle ({this.overlayHwnd})!");
+            logger.success($"Overlay created successfully for ({hwnd}) with handle ({this.overlayHwnd})!");
 
             return overlayWindow;
         }

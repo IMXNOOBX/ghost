@@ -37,7 +37,7 @@ namespace Ghost
 
             if (arguments.Length > 1 && arguments[1] == "--silent") {
                 Globals.silent = true;
-                Console.WriteLine("Running in silent mode...");
+                logger.warn("Running in silent mode...");
             }
 
             // Hide window if it was started in silent mode. (Auto start)
@@ -48,6 +48,13 @@ namespace Ghost
              * Register the tray icon
              */
             trayIcon = new TrayUtils(this);
+
+#if DEBUG
+            logger.allocConsole();
+            logger.log("Allocated console for debugging.");
+#elif RELEASE
+            logger.log("Running in release mode.");  
+#endif
 
             Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
@@ -254,12 +261,9 @@ namespace Ghost
 
             // process.excluded is already modified with the status we want to change to
             //                                                              before                                            after
-            Console.WriteLine($"Found process {process.name}({process.pid}) [{(!process.excluded ? "hidden" : "visible")}] => [{(process.excluded ? "hidden" : "visible")}]");
-
+            logger.warn($"Found process {process.name}({process.pid}) [{(!process.excluded ? "hidden" : "visible")}] => [{(process.excluded ? "hidden" : "visible")}]");
             if (process.overlay != null)
                 process.overlay.destroy();
-            //else if (process.excluded)
-                //process.excluded = !process.excluded; // Block the status change
 
             process.overlay = process.excluded ? new Overlay(process.proc) : null;
 
@@ -315,7 +319,7 @@ namespace Ghost
 
         private void refresh_list(object sender, RoutedEventArgs e) {
             Task.Run(() => update_ui_processes(false));
-            Console.WriteLine($"Manually refreshing list...");
+            logger.log("Manually refreshing list...");
         }
 
         private void drag_window(object sender, MouseButtonEventArgs e) {
@@ -370,8 +374,6 @@ namespace Ghost
 
             var cpu = Utilities.get_cpu();
             var ram = Utilities.get_ram();
-
-            // Console.WriteLine($"Current resources usage, cpu: {cpu}%, ram: {ram}%");
 
             Application.Current.Dispatcher.Invoke(() => {
                 cpuProgressBar.Value = cpu;

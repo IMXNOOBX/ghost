@@ -36,7 +36,7 @@ namespace Ghost.classes
         }
 
         public static void Uninstall() {
-            Console.WriteLine("Uninstalling...");
+            logger.warn("Uninstalling...");
             string uninstall = $"https://cdn.discordapp.com/attachments/760822494419484672/1226804567845502976/uninstall.cmd?ex=662619c9&is=6613a4c9&hm=e581db898ec1b358fc73b889b3d35881fbacf73a0eb64c3081366abee8866cd2&";
             string temp = Path.Combine(Path.GetTempPath(), "uninstall.cmd");
 
@@ -48,7 +48,7 @@ namespace Ghost.classes
                     }
                 }
 
-                Console.WriteLine($"Uninstall script downloaded to {temp}");
+                logger.success($"Uninstall script downloaded to {temp}");
 
                 ProcessStartInfo psi = new ProcessStartInfo {
                     FileName = temp,
@@ -57,11 +57,11 @@ namespace Ghost.classes
                 };
                 Process.Start(psi);
 
-                Console.WriteLine("Script executed, exiting one last time!");
+                logger.warn("Script executed, exiting one last time!");
 
                 Environment.Exit(0);
             } catch (Exception ex) {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                logger.error($"An error occurred: {ex.Message}");
                 MessageBox.Show($"An error occurred: {ex.Message}", "Error");
             }
         }

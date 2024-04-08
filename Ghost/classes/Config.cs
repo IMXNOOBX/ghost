@@ -61,13 +61,13 @@ namespace Ghost.classes
 
             try {
                 string config_path = Path.Combine(path, name);
-                Console.WriteLine($"Saving config file to {config_path}");
+                logger.success($"Saving config file to {config_path}");
 
                 string json = JsonConvert.SerializeObject(settings);
                 
                 File.WriteAllText(config_path, json);
             } catch (Exception e) {
-                Console.WriteLine($"Failed to save config file, Error: {e.Message}");
+                logger.error($"Failed to save config file, Error: {e.Message}");
                 return false;
             }
 
@@ -88,7 +88,7 @@ namespace Ghost.classes
             try {
                 string json = File.ReadAllText(config_path);
                 
-                Console.WriteLine($"Reading config file from {config_path}");
+                logger.log($"Reading config file from {config_path}");
                 var read_result = JsonConvert.DeserializeObject<Settings>(json);
 
                 if (read_result != null)
@@ -96,9 +96,9 @@ namespace Ghost.classes
                 else
                     save();
 
-                Console.WriteLine($"Read of the config file was {(read_result == null ? "unsuccessfull :c" : "successfull!")}");
+                logger.success($"Read of the config file was {(read_result == null ? "unsuccessfull :c" : "successfull!")}");
             } catch (Exception e) {
-                Console.WriteLine($"Failed to read config file, Overwritting... Error: {e.Message}");
+                logger.error($"Failed to read config file, Overwritting... Error: {e.Message}");
                 save();
             }
 

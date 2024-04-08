@@ -153,7 +153,7 @@ namespace Ghost.classes
             }
 
             //Console.WriteLine($"Cached processes: {cached_processes} out of {processes.Count - cached_processes}");
-            Console.WriteLine($"Processes list completed in {(DateTime.Now - startTime).TotalMilliseconds:F2}ms cache ({cached_processes}/{processes.Count - cached_processes})");
+            logger.log($"Processes list completed in {(DateTime.Now - startTime).TotalMilliseconds:F2}ms cache ({cached_processes}/{processes.Count - cached_processes})");
 
             cache_processes = processes;
             return processes;
