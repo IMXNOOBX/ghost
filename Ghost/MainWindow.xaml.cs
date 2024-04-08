@@ -58,10 +58,10 @@ namespace Ghost
             logger.allocConsole();
             logger.log("Allocated console for debugging.");
 #elif RELEASE
-            logger.log("Running in release mode.");  
+            logger.log("Running in release mode.");
 #endif
 
-            Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
+            Globals.isLight = false;//WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
             {
                 CaptionHeight = 0,

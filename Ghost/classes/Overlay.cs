@@ -99,15 +99,15 @@ namespace Ghost.classes
 
             this.overlayHwnd = overlayWindow.GetHandle();
 
-            if (Config.settings.show_hidden_indicator)
-                overlayWindow.Content = new Image { 
-                    Source = new BitmapImage(new Uri("pack://application:,,,/assets/invisible-white.png")), 
-                    Stretch = System.Windows.Media.Stretch.Fill,
-                    Width = 16, Height = 16,
-                    Margin = new Thickness(0, 12, 0, 0),
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Top
-                };
+            overlayWindow.Content = new Image { 
+                Source = new BitmapImage(new Uri("pack://application:,,,/assets/invisible-white.png")), 
+                Stretch = System.Windows.Media.Stretch.Fill,
+                Width = 16, Height = 16,
+                Margin = new Thickness(0, 12, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Top,
+                Visibility = Config.settings.show_hidden_indicator ? Visibility.Visible : Visibility.Hidden
+            };
 
             overlayWindow.Show();
 
