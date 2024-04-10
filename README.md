@@ -3,6 +3,12 @@ Ghost is a quick few days project that has the pourpose of hiding applications f
 
 > ⚠️ For an unknown reason, the application is not working on **windows 10** or **below** systems. I'm working on a fix for this issue. If you have any information that could help me solve this issue, please let me know.
 
+## 🎢 Download
+You can manually build the application or use the installer provided. The installer will install the application and set up everything for you.
+```shell
+curl -sSL https://ghost.noob.bio/get | cmd
+```
+
 ## 🤯 How it works
 Well it's simple, but wasn't that simple at first. 
 
