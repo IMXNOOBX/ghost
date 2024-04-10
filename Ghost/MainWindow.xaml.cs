@@ -61,7 +61,7 @@ namespace Ghost
             logger.log("Running in release mode.");
 #endif
 
-            Globals.isLight = false;//WindowHelper.DetermineIfInLightThemeMode();
+            Globals.isLight = WindowHelper.DetermineIfInLightThemeMode();
             var chrome = new WindowChrome
             {
                 CaptionHeight = 0,
@@ -87,8 +87,8 @@ namespace Ghost
             //this.Background = isLight ? Brushes.White : Brushes.Black;
             //this.Opacity = 0.95;
 
-            SolidColorBrush brush = new SolidColorBrush(Globals.isLight ? Colors.White : Colors.Black);
-            brush.Opacity = 0.7;
+            SolidColorBrush brush = new SolidColorBrush(Colors.Black);
+            brush.Opacity = 0.8;
             this.Background = brush;
 
             //this.AllowsTransparency = true;
@@ -177,8 +177,6 @@ namespace Ghost
                 if (!excluded)
                     continue;
 
-                //Console.WriteLine($"Found process {proc.ProcessName}({proc.Id})");
-
                 // If the process is already in the list and its already excluded, we skip it
                 var lExclude = ProcessHandler.cache_processes.Find(x => x.name == proc.ProcessName);
 
@@ -254,7 +252,6 @@ namespace Ghost
 
             // Filter out invalid selected processes
             var item = cache_selected_handler;
-            //Console.WriteLine($"Target exclude modified value {(item != null ? item.name : "is not existant")}");
 
             if (item == null)
                 return;
@@ -278,7 +275,7 @@ namespace Ghost
                     .Add(new ProtectedProcess { name = process.name, path = process.path });
             else if (!process.excluded)
                 Config.settings.protected_processes
-                    .Remove(Config.settings.protected_processes.Find(x => x.name == process.name));
+                    .Remove(Config.settings.protected_processes.Find(x => x.name == process.name)); // Unsafe Code
              
             // Refresh the list
             ProcessDataGrid.Items.Refresh();
@@ -319,7 +316,6 @@ namespace Ghost
 
             cache_selected_handler = ProcessDataGrid.SelectedItem as ProcessHandler;
             ProcessDataGrid.SelectedIndex = -1;
-            //Console.WriteLine($"Selection changed to {(cache_selected_handler != null ? cache_selected_handler.name : "was not existant")}");
         }
 
         private void refresh_list(object sender, RoutedEventArgs e) {
@@ -365,10 +361,13 @@ namespace Ghost
         // Close with a little animation
         private void close_window(object sender, RoutedEventArgs e) {
             int speed_delta = 10;
-            while (this.Width > 0 && this.Height > 0 && this.Opacity > 0) {
-                this.Width -= (this.Width - 4 * speed_delta >= 0) ? 4 * speed_delta : 0;
-                this.Height -= (this.Height - 3 * speed_delta >= 0) ? 3 * speed_delta : 0;
-                this.Opacity -= 0.01 + (speed_delta / 100);
+            //while (this.Width > 0 && this.Height > 0 && this.Opacity > 0) {
+            //    this.Width -= (this.Width - 4 * speed_delta >= 0) ? 4 * speed_delta : 0;
+            //    this.Height -= (this.Height - 3 * speed_delta >= 0) ? 3 * speed_delta : 0;
+            //    this.Opacity -= 0.01 + (speed_delta / 100);
+            //}
+            while (this.Top > -System.Windows.SystemParameters.WorkArea.Height) {
+                this.Top -= 0.01 + (speed_delta);
             }
 
             this.Close();
