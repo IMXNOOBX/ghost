@@ -20,8 +20,6 @@ The main downside would be that if the capture is directly focusing that window 
 ```diff
 - (moderate) The overlay will not work if the capture is directly focusing the target window.
 
-- (low) If the target window is half covered by another window the overlay will still be in front covering the same space as the window. (I'm thinking on a solution for this)
-
 - (low) If you Alt + Tab or Win + Tab the application will be visible in the preview. (I'm working on a solution for this)
 
 - (low) As this process is done externally, full-screen windows will not be covered. (just full-screen not borderless or maximized windows) 
