@@ -30,7 +30,7 @@ namespace Ghost.classes
             trayIcon = new NotifyIcon();
             trayIcon.Init();
 
-            trayIcon.Icon = new BitmapImage(new Uri("pack://application:,,,/assets/reload-white.png"));
+            trayIcon.Icon = new BitmapImage(new Uri("pack://application:,,,/assets/cat_hiding.ico"));
             trayIcon.Text = Globals.fullName;
             trayIcon.ToolTip = Globals.name;
             //trayIcon.IsBlink = true;
@@ -74,6 +74,7 @@ namespace Ghost.classes
             };
             exit.Click += (sender, e) => {
                 mainWindow.Close();
+                Environment.Exit(0);
             };
 
 

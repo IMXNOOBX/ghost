@@ -11,6 +11,7 @@
     <PublishSingleFile>true</PublishSingleFile>
       <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <ApplicationIcon>assets\cat_hiding.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,6 +43,10 @@
       <VersionMajor>6</VersionMajor>
       <Guid>000204ef-0000-0000-c000-000000000046</Guid>
     </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\cat_hiding.ico" />
   </ItemGroup>
 
   <ItemGroup>
