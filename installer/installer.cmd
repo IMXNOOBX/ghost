@@ -7,16 +7,22 @@ set "installPath=%APPDATA%\Ghost"
 set "shortcutPath=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Ghost.lnk"
 
 rem Download latest release from GitHub
-powershell -Command "(Invoke-WebRequest -Uri '%repoUrl%' -UseBasicParsing).Content | ConvertFrom-Json | Select -ExpandProperty assets | Select -ExpandProperty browser_download_url | %{ Invoke-WebRequest -Uri $_ -OutFile 'temp.zip' }"
+powershell -Command "$response = Invoke-WebRequest -Uri '%repoUrl%' -UseBasicParsing; if ($response.StatusCode -eq 200) { $downloadUrl = ($response.Content | ConvertFrom-Json).assets.browser_download_url; Invoke-WebRequest -Uri $downloadUrl -OutFile '%installPath%\temp.zip'; if ($?) { exit 0 } else { exit 1 } } else { exit 1 }"
 
-rem Create installation directory
+rem Check if the download was successful
+if %errorlevel% neq 0 (
+    echo Error: Failed to download the latest release.
+    exit /b 1
+)
+
+rem Create installation directory if it doesn't exist
 if not exist "%installPath%" mkdir "%installPath%"
 
 rem Extract files to destination
-powershell -Command "Expand-Archive -Path 'temp.zip' -DestinationPath '%installPath%'"
+powershell -Command "Expand-Archive -Path '%installPath%\temp.zip' -DestinationPath '%installPath%'"
 
 rem Clean up temporary files
-del "temp.zip"
+del "%installPath%\temp.zip"
 
 rem Create shortcut
 powershell -Command "$WScriptShell = New-Object -ComObject WScript.Shell; $Shortcut = $WScriptShell.CreateShortcut('%shortcutPath%'); $Shortcut.TargetPath = '%installPath%\Ghost.exe'; $Shortcut.Save()"
