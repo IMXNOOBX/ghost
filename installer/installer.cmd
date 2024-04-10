@@ -19,7 +19,7 @@ rem Create installation directory if it doesn't exist
 if not exist "%installPath%" mkdir "%installPath%"
 
 rem Extract files to destination
-powershell -Command "Expand-Archive -Path '%installPath%\temp.zip' -DestinationPath '%installPath%'"
+powershell -Command "Expand-Archive -Path '%installPath%\temp.zip' -DestinationPath '%installPath%'" -Force
 
 rem Clean up temporary files
 del "%installPath%\temp.zip"
