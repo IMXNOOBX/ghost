@@ -1,6 +1,8 @@
 # 👻 ghost
 Ghost is a quick few days project that has the pourpose of hiding applications from screen capture. *As a cronical online user (by ntts)*, I use discord and im most of the time sharing screen. This leads to sharing some information or applications such as password-managers been leaked. This is a simple solution to that problem & a cool project to work on.
 
+> ⚠️ For an unknown reason, the application is not working on **windows 10** or **below** systems. I'm working on a fix for this issue. If you have any information that could help me solve this issue, please let me know.
+
 ## 🤯 How it works
 Well it's simple, but wasn't that simple at first. 
 
