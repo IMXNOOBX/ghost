@@ -83,6 +83,8 @@ namespace Ghost.classes
             if (hwnd == 0)
                 hwnd = Process.GetCurrentProcess().MainWindowHandle;
 
+            //logger.log($"Window handle is {hwnd}");
+
             SetWindowDisplayAffinity(hwnd, type);
         }
 

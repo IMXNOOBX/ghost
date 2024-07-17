@@ -158,9 +158,9 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock HorizontalAlignment="Center" Margin="10" Text="Update Rate" Style="{StaticResource TextBlockSubTitleBold}"/>
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <RadioButton x:Name="rbFast" Margin="16,0,16,0" Content="Fast (1/1s)"   Checked="updaterate_checked"/>
-                                    <RadioButton x:Name="rbNormal" Margin="16,0,16,0" Content="Normal (1/5s)" Checked="updaterate_checked" IsChecked="True"/>
-                                    <RadioButton x:Name="rbSlow" Margin="16,0,16,0" Content="Slow (1/10s)"  Checked="updaterate_checked"/>
+                                    <RadioButton x:Name="rbFast" Margin="16,0,16,0" Content="Fast (1/1s)"   Checked="update_rate_checked"/>
+                                    <RadioButton x:Name="rbNormal" Margin="16,0,16,0" Content="Normal (1/5s)" Checked="update_rate_checked" IsChecked="True"/>
+                                    <RadioButton x:Name="rbSlow" Margin="16,0,16,0" Content="Slow (1/10s)"  Checked="update_rate_checked"/>
                                 </StackPanel>
                             </Grid>
                             <Grid Grid.Row="3">

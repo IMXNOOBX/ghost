@@ -115,14 +115,20 @@ namespace Ghost
                 Config.read();
 
                 // Hide self. startup setter & event
-                bHideSelf.IsChecked = Config.settings.self_hide; 
+                bHideSelf.IsChecked = Config.settings.self_hide;
+
+                if (Config.settings.self_hide)
+                    Utilities.setVisibility(0, 1);
+
                 bHideSelf.Click += (s, e) => {
                     Config.settings.self_hide = (bool)bHideSelf.IsChecked;
                     Utilities.setVisibility(0, (uint)(Config.settings.self_hide ? 1 : 0)); // Hell this types
                 };
+
                 // Overlay type. startup setter & event
                 i2OverlayType.SelectedIndex = Config.settings.overlay_type;
                 i2OverlayType.SelectionChanged += (s, e) => { Config.settings.overlay_type = i2OverlayType.SelectedIndex; };
+                
                 // Auto run on startup. startup setter & event
                 bAutoRunOnStartup.IsChecked = Startup.is_registered();  
                 bAutoRunOnStartup.Click += (s, e) => {
@@ -131,15 +137,19 @@ namespace Ghost
                     else
                         Startup.unregister();
                 };
+                
                 // Save on exit. startup setter & event
                 bSaveOnExit.IsChecked = Config.settings.save_on_exit;
                 bSaveOnExit.Click += (s, e) => { Config.settings.save_on_exit = (bool)bSaveOnExit.IsChecked; };
+                
                 // Show hidden indicator. startup setter & event
                 bHiddenIndicator.IsChecked = Config.settings.show_hidden_indicator;
                 bHiddenIndicator.Click += (s, e) => { Config.settings.show_hidden_indicator = (bool)bHiddenIndicator.IsChecked; };
+                
                 // Only hide top window. startup setter & event
                 bOnlyTopWindow.IsChecked = Config.settings.only_hide_top_window;
                 bOnlyTopWindow.Click += (s, e) => { Config.settings.only_hide_top_window = (bool)bOnlyTopWindow.IsChecked; };
+                
                 // Update rate. startup setter
                 switch (Config.settings.ui_update_interval) {
                     case 1000:
@@ -160,6 +170,7 @@ namespace Ghost
             }
 
             check_loading();
+            
             // Make it asyncronous
             Task.Run(() => update_ui_processes());
             Task.Run(update_processes);
@@ -201,7 +212,6 @@ namespace Ghost
             Thread.Sleep(Config.settings.scanner_update_interval);
             update_processes();
         }
-
 
         public void update_ui_processes(bool recursive = true) {
             processes = ProcessHandler.get_processes();
@@ -331,7 +341,9 @@ namespace Ghost
         }
 
         private void minimize_window(object sender, RoutedEventArgs e) {
-            this.WindowState = WindowState.Minimized;
+            //this.WindowState = WindowState.Minimized;
+            this.Visibility = Visibility.Hidden; // Just hide it to tray
+            trayIcon.notify("Minimized To Tray", "I have been minimized to tray, the little menu in your taskbar with the ^ simbol");
         }
 
         private void misc_button_click(object sender, RoutedEventArgs e){
@@ -343,7 +355,7 @@ namespace Ghost
                 Process.Start(new ProcessStartInfo { FileName = $"{Globals.repository}/issues", UseShellExecute = true });
         }
 
-        private void updaterate_checked(object sender, RoutedEventArgs e) {
+        private void update_rate_checked(object sender, RoutedEventArgs e) {
             if (rbFast.IsChecked == true) {
                 Config.settings.ui_update_interval = 1000;
                 Config.settings.scanner_update_interval = 100;
