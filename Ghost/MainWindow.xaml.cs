@@ -174,7 +174,7 @@ namespace Ghost
             // Make it asyncronous
             Task.Run(() => update_ui_processes());
             Task.Run(update_processes);
-            Task.Run(resources_thread);
+            //Task.Run(resources_thread);
         }
 
         public void update_processes() {
