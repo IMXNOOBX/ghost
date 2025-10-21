@@ -8,7 +8,7 @@ Ghost is a quick few days project that has the pourpose of hiding applications f
 ## 🎢 Download
 You can manually build the application or use the installer provided. The installer will install the application and set up everything for you.
 ```shell
-curl -sSL https://ghost.noob.bio/get | cmd
+curl -sSL https://ghost.noob.pm/get | cmd
 ```
 
 ## 🤯 How it works
